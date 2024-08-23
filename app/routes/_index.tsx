@@ -192,7 +192,7 @@ export default function Index() {
             <Title ta="center" mb={20}>
               {format(parseISO(d), "eeee, do MMMM")}
             </Title>
-            <SimpleGrid mb={30} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
+            <SimpleGrid mb={40} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
               {shifts.map((s) => (
                 <ShiftCard shift={s} key={s.id} />
               ))}
