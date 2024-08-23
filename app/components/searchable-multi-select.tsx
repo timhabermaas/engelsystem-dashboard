@@ -67,7 +67,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
       withinPortal={false}
     >
       <Combobox.DropdownTarget>
-        <PillsInput onClick={() => combobox.openDropdown()}>
+        <PillsInput onClick={() => combobox.openDropdown()} size="md">
           <Pill.Group>
             {values}
 
