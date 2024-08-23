@@ -2,12 +2,17 @@ import {
   Badge,
   Center,
   Group,
+  Indicator,
   Paper,
   Progress,
+  RingProgress,
+  SemiCircleProgress,
+  Space,
   Text,
   rem,
+  useMantineTheme,
 } from "@mantine/core";
-import { IconMapPin } from "@tabler/icons-react";
+import { IconArrowUpRight, IconMapPin } from "@tabler/icons-react";
 import { format, parseISO } from "date-fns";
 import { marked } from "marked";
 import { NavLink as NavLinkRemix } from "@remix-run/react";
@@ -41,14 +46,23 @@ interface ShiftCardProps {
 //   * [x] has
 //   * [x] list of user names
 export function ShiftCard(props: ShiftCardProps) {
+  const theme = useMantineTheme();
+
   const renderedDescription =
     props.shift.description.length > 0
       ? marked.parse(props.shift.description, { async: false })
       : "";
 
   return (
-    <Paper shadow="xl" radius="md" withBorder p="xl">
-      <Center>
+    <Paper shadow="md" radius="md" withBorder p="lg">
+      <Text ta="center" fw={800} mb={0}>
+        {props.shift.title}
+      </Text>
+      <Text c="dimmed" ta="center" fz="sm">
+        {format(parseISO(props.shift.start), "HH:mm")} –{" "}
+        {format(parseISO(props.shift.end), "HH:mm")}
+      </Text>
+      <Center mt={10}>
         <Badge
           leftSection={
             <IconMapPin style={{ width: rem(12), height: rem(12) }} />
@@ -57,13 +71,6 @@ export function ShiftCard(props: ShiftCardProps) {
           {props.shift.location_name}
         </Badge>
       </Center>
-      <Group justify="center">
-        <Text fw={800}>{props.shift.title}</Text>
-      </Group>
-      <Text c="dimmed" ta="center" fz="sm">
-        {format(parseISO(props.shift.start), "HH:mm")} –{" "}
-        {format(parseISO(props.shift.end), "HH:mm")}
-      </Text>
 
       {props.shift.needed_angel_types.map((na) => (
         <>
@@ -80,19 +87,18 @@ export function ShiftCard(props: ShiftCardProps) {
 
           <Progress
             value={(na.count / na.needs) * 100}
-            mt={5}
-            color={na.count / na.needs >= 1 ? "green" : "yellow"}
+            mt={2}
+            color={na.count / na.needs >= 1 ? "green" : "orange"}
           />
-          {/* TODO: Make it clickable to filter by that user. */}
-          <Group mt={6}>
+          <Group mt={8} gap={4}>
             {na.entries.map((e) => (
               <Badge
+                tt="none"
+                variant="light"
                 key={e.id}
                 leftSection="🤹"
-                color="green"
-                component={NavLinkRemix}
+                color="blue.5"
                 styles={{ root: { cursor: "pointer" } }}
-                to="/users/foo"
               >
                 {e.user_name}
               </Badge>

@@ -20,7 +20,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto">{children}</MantineProvider>
+        <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

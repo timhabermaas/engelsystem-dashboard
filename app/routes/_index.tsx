@@ -24,6 +24,7 @@ import {
   Grid,
   SimpleGrid,
   Space,
+  Indicator,
 } from "@mantine/core";
 import { json, SerializeFrom, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, NavLink as NavLinkRemix } from "@remix-run/react";
