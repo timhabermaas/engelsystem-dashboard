@@ -2,20 +2,15 @@ import {
   Badge,
   Center,
   Group,
-  Indicator,
   Paper,
   Progress,
-  RingProgress,
-  SemiCircleProgress,
-  Space,
   Text,
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { IconArrowUpRight, IconMapPin } from "@tabler/icons-react";
+import { IconMapPin } from "@tabler/icons-react";
 import { format, parseISO } from "date-fns";
 import { marked } from "marked";
-import { NavLink as NavLinkRemix } from "@remix-run/react";
 
 interface ShiftCardProps {
   shift: {
@@ -46,8 +41,7 @@ interface ShiftCardProps {
 //   * [x] has
 //   * [x] list of user names
 export function ShiftCard(props: ShiftCardProps) {
-  const theme = useMantineTheme();
-
+  // TODO: Display description in an overlay after touch.
   const renderedDescription =
     props.shift.description.length > 0
       ? marked.parse(props.shift.description, { async: false })

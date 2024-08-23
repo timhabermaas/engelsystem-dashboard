@@ -1,39 +1,19 @@
 import {
   AppShell,
   Burger,
-  Combobox,
   Group,
-  Highlight,
   NavLink,
-  TextInput,
   Title,
-  useCombobox,
-  Image,
-  Text,
-  Badge,
-  Button,
-  Paper,
-  Progress,
-  ThemeIcon,
-  rem,
-  Center,
-  TypographyStylesProvider,
-  Affix,
-  Stack,
-  SegmentedControl,
-  Grid,
   SimpleGrid,
   Space,
-  Indicator,
 } from "@mantine/core";
-import { json, SerializeFrom, type MetaFunction } from "@remix-run/node";
+import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, NavLink as NavLinkRemix } from "@remix-run/react";
 import { format, parseISO } from "date-fns";
 import { NotNull } from "kysely";
 import { useState } from "react";
 import { db } from "~/db/connection";
 import { groupBy } from "~/utils";
-import { useScrollIntoView } from "@mantine/hooks";
 import { ShiftCard } from "~/components/shift-card";
 import { SearchableMultiSelect } from "~/components/searchable-multi-select";
 
@@ -145,9 +125,6 @@ export async function loader() {
 // * Scroll to days by using a combination of Affix and FloatingIndicator (optional)
 
 export default function Index() {
-  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
-    offset: 60,
-  });
   const data = useLoaderData<typeof loader>();
   const [opened, setOpened] = useState<boolean>(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -212,7 +189,7 @@ export default function Index() {
         {Object.entries(shiftsByDate).map(([d, shifts]) => (
           /* TODO: Move this into its own component and use targetRef inside */
           <>
-            <Title ta="center" mb={20} ref={targetRef}>
+            <Title ta="center" mb={20}>
               {format(parseISO(d), "eeee, do MMMM")}
             </Title>
             <SimpleGrid mb={30} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
@@ -223,19 +200,6 @@ export default function Index() {
           </>
         ))}
       </AppShell.Main>
-      {/*<Affix
-        position={{ bottom: 20, left: "50%" }}
-        style={{
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        <SegmentedControl
-          data={Object.keys(shiftsByDate)}
-          onChange={(v) => {
-            scrollIntoView();
-          }}
-        ></SegmentedControl>
-      </Affix>*/}
     </AppShell>
   );
 }
