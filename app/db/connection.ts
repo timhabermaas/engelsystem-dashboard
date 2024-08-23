@@ -5,7 +5,6 @@ import { DB } from "./db";
 const databaseUri =
   process.env.DATABASE_URL ??
   "mysql://engelsystem:engelsystem@localhost:3306/engelsystem";
-console.log(`DATABASE_URL: ${databaseUri}`);
 
 const dialect = new MysqlDialect({
   pool: createPool({
