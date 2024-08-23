@@ -39,8 +39,11 @@ import { SearchableMultiSelect } from "~/components/searchable-multi-select";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Dashboard Engelsystem" },
+    {
+      name: "description",
+      content: "Read-only dashboard displaying all shifts",
+    },
   ];
 };
 
