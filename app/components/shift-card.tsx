@@ -4,13 +4,16 @@ import {
   Group,
   Paper,
   Progress,
+  Stack,
   Text,
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { IconMapPin } from "@tabler/icons-react";
+
+import { IconChisel, IconMapPin } from "@tabler/icons-react";
 import { format, parseISO } from "date-fns";
 import { marked } from "marked";
+import { colorForName } from "~/utils";
 
 interface ShiftCardProps {
   shift: {
@@ -19,6 +22,8 @@ interface ShiftCardProps {
     title: string;
     start: string;
     end: string;
+    shift_type_id: number;
+    shift_type_name: string;
     needed_angel_types: {
       angel_type_name: string;
       count: number;
@@ -56,7 +61,15 @@ export function ShiftCard(props: ShiftCardProps) {
         {format(parseISO(props.shift.start), "HH:mm")} –{" "}
         {format(parseISO(props.shift.end), "HH:mm")}
       </Text>
-      <Center mt={10}>
+      <Stack mt={10} align="center" gap={4}>
+        <Badge
+          leftSection={
+            <IconChisel style={{ width: rem(12), height: rem(12) }} />
+          }
+          color={colorForName(props.shift.shift_type_name)}
+        >
+          {props.shift.shift_type_name}{" "}
+        </Badge>
         <Badge
           leftSection={
             <IconMapPin style={{ width: rem(12), height: rem(12) }} />
@@ -64,7 +77,7 @@ export function ShiftCard(props: ShiftCardProps) {
         >
           {props.shift.location_name}
         </Badge>
-      </Center>
+      </Stack>
 
       {props.shift.needed_angel_types.map((na) => (
         <>
