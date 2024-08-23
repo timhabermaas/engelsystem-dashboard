@@ -1,0 +1,4 @@
+.icon {
+  margin-right: rem(5px);
+  color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-2));
+}

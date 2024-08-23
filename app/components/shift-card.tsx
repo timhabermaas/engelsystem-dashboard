@@ -2,18 +2,23 @@ import {
   Badge,
   Center,
   Group,
+  NumberFormatter,
   Paper,
   Progress,
   Stack,
   Text,
   rem,
-  useMantineTheme,
 } from "@mantine/core";
-
-import { IconChisel, IconMapPin } from "@tabler/icons-react";
-import { format, parseISO } from "date-fns";
+import {
+  IconChisel,
+  IconClock,
+  IconMapPin,
+  IconStopwatch,
+} from "@tabler/icons-react";
+import { differenceInMinutes, format, parseISO } from "date-fns";
 import { marked } from "marked";
 import { colorForName } from "~/utils";
+import classes from "~/components/shift-card.module.css";
 
 interface ShiftCardProps {
   shift: {
@@ -39,7 +44,7 @@ interface ShiftCardProps {
 // * [x] time from
 // * [x] time to
 // * [x] title
-// * [ ] shift type
+// * [x] shift type
 // * [x] location
 // * [x] per angel type:
 //   * [x] needs
@@ -52,66 +57,88 @@ export function ShiftCard(props: ShiftCardProps) {
       ? marked.parse(props.shift.description, { async: false })
       : "";
 
+  const start = parseISO(props.shift.start);
+  const end = parseISO(props.shift.end);
+  const durationInMin = differenceInMinutes(end, start);
+
   return (
-    <Paper shadow="md" radius="md" withBorder p="lg">
-      <Text ta="center" fw={800} mb={0}>
-        {props.shift.title}
-      </Text>
-      <Text c="dimmed" ta="center" fz="sm">
-        {format(parseISO(props.shift.start), "HH:mm")} –{" "}
-        {format(parseISO(props.shift.end), "HH:mm")}
-      </Text>
-      <Stack mt={10} align="center" gap={4}>
-        <Badge
-          leftSection={
-            <IconChisel style={{ width: rem(12), height: rem(12) }} />
-          }
-          color={colorForName(props.shift.shift_type_name)}
-        >
-          {props.shift.shift_type_name}{" "}
-        </Badge>
-        <Badge
-          leftSection={
-            <IconMapPin style={{ width: rem(12), height: rem(12) }} />
-          }
-        >
-          {props.shift.location_name}
-        </Badge>
-      </Stack>
-
-      {props.shift.needed_angel_types.map((na) => (
-        <>
-          {/*
-          <TypographyStylesProvider>
-            <div dangerouslySetInnerHTML={{ __html: renderedDescription }} />
-          </TypographyStylesProvider>*/}
-          <Text c="dimmed" fz="sm" mt="md">
-            {na.angel_type_name}:{" "}
-            <Text span c="bright">
-              {na.count}/{na.needs}
-            </Text>
+    <Paper shadow="sm" radius="md" withBorder p="lg" py="lg">
+      <Stack justify="space-between" h="100%">
+        <div>
+          <Center mb={10}>
+            <Badge
+              leftSection={
+                <IconChisel style={{ width: rem(12), height: rem(12) }} />
+              }
+              color={colorForName(props.shift.shift_type_name)}
+            >
+              {props.shift.shift_type_name}{" "}
+            </Badge>
+          </Center>
+          <Text ta="center" fw={800} mb={-1}>
+            {props.shift.title}
           </Text>
+          <Center mb={20}>
+            <IconClock className={classes.icon} size="1.25rem" stroke={1.5} />
+            <Text size="sm">
+              {format(start, "HH:mm")} – {format(end, "HH:mm")}
+            </Text>
+          </Center>
 
-          <Progress
-            value={(na.count / na.needs) * 100}
-            mt={2}
-            color={na.count / na.needs >= 1 ? "green" : "orange"}
-          />
-          <Group mt={8} gap={4}>
-            {na.entries.map((e) => (
-              <Badge
-                tt="none"
-                variant="light"
-                key={e.id}
-                leftSection="🤹"
-                color="blue.5"
-              >
-                {e.user_name}
-              </Badge>
+          <Stack gap={10}>
+            {props.shift.needed_angel_types.map((na) => (
+              <div>
+                <Text c="dimmed" fz="sm">
+                  {na.angel_type_name}:{" "}
+                  <Text span c="bright">
+                    {na.count}/{na.needs}
+                  </Text>
+                </Text>
+
+                <Progress
+                  value={(na.count / na.needs) * 100}
+                  mt={2}
+                  color={na.count / na.needs >= 1 ? "green" : "orange"}
+                />
+                <Group mt={8} gap={4}>
+                  {na.entries.map((e) => (
+                    <Badge
+                      tt="none"
+                      variant="light"
+                      key={e.id}
+                      leftSection="🤹"
+                      color="blue.5"
+                    >
+                      {e.user_name}
+                    </Badge>
+                  ))}
+                </Group>
+              </div>
             ))}
-          </Group>
-        </>
-      ))}
+          </Stack>
+        </div>
+
+        <Group gap={8} mt={15}>
+          <Center>
+            <IconMapPin className={classes.icon} size="1.05rem" stroke={1.5} />
+            <Text size="xs">{props.shift.location_name}</Text>
+          </Center>
+          <Center>
+            <IconStopwatch
+              className={classes.icon}
+              size="1.05rem"
+              stroke={1.5}
+            />
+            <Text size="xs">
+              <NumberFormatter
+                value={durationInMin / 60}
+                decimalScale={2}
+                suffix="h"
+              />
+            </Text>
+          </Center>
+        </Group>
+      </Stack>
     </Paper>
   );
 }

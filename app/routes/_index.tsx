@@ -122,7 +122,7 @@ export async function loader() {
 
 // TODO:
 // * Header with fullscreen button (useFullscreen)
-// * Scroll to days by using a combination of Affix and FloatingIndicator (optional)
+// * Slider with from+to to limit date + time. eachHourOfInterval can be used to get a list of hours for the slider values.
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
