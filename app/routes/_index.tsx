@@ -19,20 +19,22 @@ import {
   Center,
   TypographyStylesProvider,
   Affix,
-  Transition,
   Stack,
   SegmentedControl,
+  Grid,
+  SimpleGrid,
+  Space,
 } from "@mantine/core";
-import { marked } from "marked";
 import { json, SerializeFrom, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, NavLink as NavLinkRemix } from "@remix-run/react";
-import { IconArrowUp, IconMapPin, IconSwimming } from "@tabler/icons-react";
 import { format, parseISO } from "date-fns";
 import { NotNull } from "kysely";
 import { useState } from "react";
 import { db } from "~/db/connection";
 import { groupBy } from "~/utils";
-import { useScrollIntoView, useWindowScroll } from "@mantine/hooks";
+import { useScrollIntoView } from "@mantine/hooks";
+import { ShiftCard } from "~/components/shift-card";
+import { SearchableMultiSelect } from "~/components/searchable-multi-select";
 
 export const meta: MetaFunction = () => {
   return [
@@ -79,7 +81,7 @@ export async function loader() {
 
   const needed_angel_types = await db
     .selectFrom("needed_angel_types")
-    .leftJoin(
+    .innerJoin(
       "angel_types",
       "angel_types.id",
       "needed_angel_types.angel_type_id"
@@ -118,7 +120,11 @@ export async function loader() {
     }),
   }));
 
-  const users = await db.selectFrom("users").select(["id", "name"]).execute();
+  const users = await db
+    .selectFrom("users")
+    .select(["id", "name"])
+    .orderBy("name")
+    .execute();
 
   return json({
     users,
@@ -130,129 +136,42 @@ export async function loader() {
   });
 }
 
-type LoaderType = SerializeFrom<typeof loader>;
-
-interface ShiftCardProps {
-  shift: LoaderType["combined_shifts"][number];
-}
-
 // TODO:
 // * Header with fullscreen button (useFullscreen)
-// * Scroll to days by using a combination of Affix and FloatingIndicator
-
-// Inspiration: https://ui.mantine.dev/category/stats/#stats-card
-//
-// Information to display:
-// * [x] time from
-// * [x] time to
-// * [x] title
-// * [ ] shift type
-// * [x] location
-// * [x] per angel type:
-//   * [x] needs
-//   * [x] has
-//   * [x] list of user names
-function ShiftCard(props: ShiftCardProps) {
-  const renderedDescription =
-    props.shift.description.length > 0
-      ? marked.parse(props.shift.description, { async: false })
-      : "";
-
-  return (
-    <Paper shadow="xl" radius="md" withBorder p="xl">
-      <Center>
-        <Badge
-          leftSection={
-            <IconMapPin style={{ width: rem(12), height: rem(12) }} />
-          }
-        >
-          {props.shift.location_name}
-        </Badge>
-      </Center>
-      <Group justify="center">
-        <Text fw={800}>{props.shift.title}</Text>
-      </Group>
-      <Text c="dimmed" ta="center" fz="sm">
-        {format(parseISO(props.shift.start), "HH:mm")} –{" "}
-        {format(parseISO(props.shift.end), "HH:mm")}
-      </Text>
-
-      {props.shift.needed_angel_types.map((na) => (
-        <>
-          {/*
-          <TypographyStylesProvider>
-            <div dangerouslySetInnerHTML={{ __html: renderedDescription }} />
-          </TypographyStylesProvider>*/}
-          <Text c="dimmed" fz="sm" mt="md">
-            {na.angel_type_name}:{" "}
-            <Text span fw={500} c="bright">
-              {na.count}/{na.needs}
-            </Text>
-          </Text>
-
-          <Progress
-            value={(na.count / na.needs) * 100}
-            mt={5}
-            color={na.count / na.needs >= 1 ? "green" : "yellow"}
-          />
-          {/* TODO: Make it clickable to filter by that user. */}
-          <Group mt={6}>
-            {na.entries.map((e) => (
-              <Badge
-                key={e.id}
-                leftSection="🤹"
-                color="green"
-                component={NavLinkRemix}
-                styles={{ root: { cursor: "pointer" } }}
-                to="/users/foo"
-              >
-                {e.user_name}
-              </Badge>
-            ))}
-          </Group>
-        </>
-      ))}
-    </Paper>
-  );
-}
+// * Scroll to days by using a combination of Affix and FloatingIndicator (optional)
 
 export default function Index() {
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 60,
   });
   const data = useLoaderData<typeof loader>();
-  const shiftsByDate = groupBy(data.combined_shifts, (s) =>
+  const [opened, setOpened] = useState<boolean>(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+
+  let combined_shifts = data.combined_shifts;
+
+  if (selectedUserIds.length > 0) {
+    combined_shifts = combined_shifts.filter((s) =>
+      s.needed_angel_types.some((at) =>
+        at.entries.some((e) => selectedUserIds.includes(e.user_id))
+      )
+    );
+  }
+
+  const shiftsByDate = groupBy(combined_shifts, (s) =>
     format(parseISO(s.start), "yyyy-MM-dd")
   );
-  console.log(shiftsByDate);
-  const users = data.users;
-  const [opened, setOpened] = useState<boolean>(false);
-  const [value, setValue] = useState("");
 
   const toggle = () => {
     setOpened((o) => !o);
   };
-
-  const combobox = useCombobox();
-
-  const filteredUsers = users.filter((u) =>
-    u.name.toLowerCase().includes(value.toLowerCase().trim())
-  );
-
-  const selectedUser = users.find((u) => u.name === value);
-
-  const options = filteredUsers.map((user) => (
-    <Combobox.Option value={user.name} key={user.id}>
-      <Highlight highlight={value}>{user.name}</Highlight>
-    </Combobox.Option>
-  ));
 
   return (
     <AppShell
       header={{ height: 60 }}
       navbar={{
         width: 300,
-        breakpoint: "sm",
+        breakpoint: "xl",
         collapsed: { mobile: !opened },
       }}
       padding="md"
@@ -278,38 +197,13 @@ export default function Index() {
         />
       </AppShell.Navbar>
       <AppShell.Main>
-        <Title order={1}>Hello {selectedUser?.name}!</Title>
-        <Combobox
-          onOptionSubmit={(optionValue) => {
-            setValue(optionValue);
-            combobox.closeDropdown();
+        <SearchableMultiSelect
+          options={data.users.map(({ id, name }) => [id.toString(), name])}
+          onChangeOptions={(values) => {
+            setSelectedUserIds(values.map((i) => parseInt(i)));
           }}
-          withinPortal={false}
-          store={combobox}
-        >
-          <Combobox.Target>
-            <TextInput
-              label="Nickname"
-              value={value}
-              onChange={(event) => {
-                setValue(event.currentTarget.value);
-                combobox.openDropdown();
-              }}
-              onClick={() => combobox.openDropdown()}
-              onFocus={() => combobox.openDropdown()}
-              onBlur={() => combobox.closeDropdown()}
-            />
-          </Combobox.Target>
-          <Combobox.Dropdown>
-            <Combobox.Options>
-              {options.length === 0 ? (
-                <Combobox.Empty>Nothing found</Combobox.Empty>
-              ) : (
-                options
-              )}
-            </Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
+        />
+        <Space mt={20} />
 
         {Object.entries(shiftsByDate).map(([d, shifts]) => (
           /* TODO: Move this into its own component and use targetRef inside */
@@ -317,15 +211,15 @@ export default function Index() {
             <Title ta="center" mb={20} ref={targetRef}>
               {format(parseISO(d), "eeee, do MMMM")}
             </Title>
-            <Stack mb={30}>
+            <SimpleGrid mb={30} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
               {shifts.map((s) => (
                 <ShiftCard shift={s} key={s.id} />
               ))}
-            </Stack>
+            </SimpleGrid>
           </>
         ))}
       </AppShell.Main>
-      <Affix
+      {/*<Affix
         position={{ bottom: 20, left: "50%" }}
         style={{
           transform: "translate(-50%, -50%)",
@@ -337,7 +231,7 @@ export default function Index() {
             scrollIntoView();
           }}
         ></SegmentedControl>
-      </Affix>
+      </Affix>*/}
     </AppShell>
   );
 }
