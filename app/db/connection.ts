@@ -2,13 +2,14 @@ import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2";
 import { DB } from "./db";
 
+const databaseUri =
+  process.env.DATABASE_URL ??
+  "mysql://engelsystem:engelsystem@localhost:3306/engelsystem";
+console.log(`DATABASE_URL: ${databaseUri}`);
+
 const dialect = new MysqlDialect({
   pool: createPool({
-    database: "engelsystem",
-    host: "localhost",
-    user: "engelsystem",
-    password: "engelsystem",
-    port: 3306,
+    uri: databaseUri,
     connectionLimit: 10,
     typeCast(field, next) {
       if (field.type === "TINY" && field.length === 1) {
