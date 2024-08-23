@@ -80,7 +80,7 @@ export function ShiftCard(props: ShiftCardProps) {
           </TypographyStylesProvider>*/}
           <Text c="dimmed" fz="sm" mt="md">
             {na.angel_type_name}:{" "}
-            <Text span fw={500} c="bright">
+            <Text span c="bright">
               {na.count}/{na.needs}
             </Text>
           </Text>
@@ -98,7 +98,6 @@ export function ShiftCard(props: ShiftCardProps) {
                 key={e.id}
                 leftSection="🤹"
                 color="blue.5"
-                styles={{ root: { cursor: "pointer" } }}
               >
                 {e.user_name}
               </Badge>

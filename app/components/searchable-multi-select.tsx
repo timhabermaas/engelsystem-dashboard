@@ -43,7 +43,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
 
   const values = value.map((id) => (
     <Pill key={id} withRemoveButton onRemove={() => handleValueRemove(id)}>
-      👤 {optionsMap.get(id)}
+      🤹 {optionsMap.get(id)}
     </Pill>
   ));
 
@@ -55,7 +55,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
       <Combobox.Option value={id} key={id} active={value.includes(id)}>
         <Group gap="sm">
           {value.includes(id) ? <CheckIcon size={12} /> : null}
-          <span>👤 {item}</span>
+          <span>🤹 {item}</span>
         </Group>
       </Combobox.Option>
     ));
