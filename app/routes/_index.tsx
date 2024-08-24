@@ -166,13 +166,13 @@ export default function Index() {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between" align="center">
+        <Group h="100%" px="md" align="center">
           <Burger opened={opened} onClick={toggle} />
-          <Title order={1} size="sm">
+          <Title order={1} size="sm" visibleFrom="xs">
             25. Freiburger Jonglierfestival
           </Title>
-          <Space flex="1"></Space>
           <ActionIcon
+            ml="auto"
             onClick={() =>
               setColorScheme(computedColorScheme === "light" ? "dark" : "light")
             }
@@ -190,7 +190,7 @@ export default function Index() {
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <Title order={2}>Navigation</Title>
+        <Title order={3}>Navigation</Title>
         <NavLink
           href="/"
           label="Overview"
