@@ -1,5 +1,5 @@
 import { Chip, Group } from "@mantine/core";
-import { colorForName } from "~/utils";
+import { colorForId } from "~/utils";
 
 interface ShiftTypeFilterProps {
   shiftTypes: { id: number; name: string }[];
@@ -16,7 +16,7 @@ export function ShiftTypeFilter(props: ShiftTypeFilterProps) {
           variant="light"
           radius="xl"
           size="sm"
-          color={colorForName(st.name)}
+          color={colorForId(st.id)}
           key={st.id}
           onChange={(checked) => props.onChange(st.id, checked)}
         >

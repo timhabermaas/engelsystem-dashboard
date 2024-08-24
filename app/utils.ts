@@ -22,6 +22,23 @@ function hashCode(input: string) {
   return hash;
 }
 
+// Using pseudo random to be able to fix seed, otherwise rerenders might change color mapping.
+function pseudoRandom(seed: number): [number, number] {
+  var x = Math.sin(seed++) * 10000;
+  return [x - Math.floor(x), seed];
+}
+
+function shuffleArray<T>(array: T[]) {
+  let seed = 1;
+
+  for (let i = array.length - 1; i > 0; i--) {
+    const [random, newSeed] = pseudoRandom(seed);
+    seed = newSeed;
+    const j = Math.floor(random * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 const defaultColors: MantineColor[] = [
   "blue",
   "cyan",
@@ -41,12 +58,12 @@ const extendedDefaultColors = defaultColors.flatMap((c) => [
   `${c}.6`,
   `${c}.9`,
 ]);
+shuffleArray(extendedDefaultColors);
 
-export function colorForName(
-  name: string,
+export function colorForId(
+  id: number,
   colors: MantineColor[] = extendedDefaultColors
 ) {
-  const hash = hashCode(name);
-  const index = Math.abs(hash) % colors.length;
+  const index = id % colors.length;
   return colors[index];
 }

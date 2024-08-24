@@ -17,7 +17,7 @@ import {
 } from "@tabler/icons-react";
 import { differenceInMinutes, format, parseISO } from "date-fns";
 import { marked } from "marked";
-import { colorForName } from "~/utils";
+import { colorForId } from "~/utils";
 import classes from "~/components/shift-card.module.css";
 
 interface ShiftCardProps {
@@ -68,7 +68,7 @@ export function ShiftCard(props: ShiftCardProps) {
           <Center mb={10}>
             <Badge
               size="md"
-              color={colorForName(props.shift.shift_type_name)}
+              color={colorForId(props.shift.shift_type_id)}
               variant="light"
             >
               {props.shift.shift_type_name}{" "}
