@@ -81,6 +81,9 @@ export function ShiftCard(props: ShiftCardProps) {
           <Center mb={20}>
             <IconClock className={classes.icon} size="1.25rem" stroke={1.5} />
             <Text size="sm">
+              {/* TODO: Make sure we use the same locale on both client side
+              and backend side, otherwise this will cause hydration to fail.
+              */}
               {format(start, "HH:mm")} – {format(end, "HH:mm")}
             </Text>
           </Center>
