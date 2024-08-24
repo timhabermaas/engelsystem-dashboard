@@ -6,6 +6,9 @@ import {
   Title,
   SimpleGrid,
   Space,
+  useComputedColorScheme,
+  useMantineColorScheme,
+  ActionIcon,
 } from "@mantine/core";
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, NavLink as NavLinkRemix } from "@remix-run/react";
@@ -16,6 +19,7 @@ import { db } from "~/db/connection";
 import { groupBy } from "~/utils";
 import { ShiftCard } from "~/components/shift-card";
 import { SearchableMultiSelect } from "~/components/searchable-multi-select";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -129,6 +133,10 @@ export default function Index() {
   const [opened, setOpened] = useState<boolean>(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
+  const { setColorScheme } = useMantineColorScheme();
+  // Actual computed value (takes auto into account)
+  const computedColorScheme = useComputedColorScheme("light");
+
   let combined_shifts = data.combined_shifts;
 
   if (selectedUserIds.length > 0) {
@@ -153,14 +161,31 @@ export default function Index() {
       navbar={{
         width: 300,
         breakpoint: "xl",
-        collapsed: { mobile: !opened },
+        collapsed: { mobile: !opened, desktop: !opened },
       }}
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          Some Logo
+        <Group h="100%" px="md" justify="space-between" align="center">
+          <Burger opened={opened} onClick={toggle} />
+          <Title order={1} size="sm">
+            25. Freiburger Jonglierfestival
+          </Title>
+          <Space flex="1"></Space>
+          <ActionIcon
+            onClick={() =>
+              setColorScheme(computedColorScheme === "light" ? "dark" : "light")
+            }
+            variant="default"
+            size="lg"
+            aria-label="Toggle color scheme"
+          >
+            {computedColorScheme === "light" ? (
+              <IconMoon stroke={2} />
+            ) : (
+              <IconSun stroke={2} />
+            )}
+          </ActionIcon>
         </Group>
       </AppShell.Header>
 
@@ -168,12 +193,12 @@ export default function Index() {
         <Title order={2}>Navigation</Title>
         <NavLink
           href="/"
-          label="some navigation"
+          label="Overview"
           renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
         />
         <NavLink
-          href="/foo"
-          label="some other navigation"
+          href="/users"
+          label="Angels"
           renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
         />
       </AppShell.Navbar>
