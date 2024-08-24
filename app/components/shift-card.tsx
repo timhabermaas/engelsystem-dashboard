@@ -67,10 +67,9 @@ export function ShiftCard(props: ShiftCardProps) {
         <div>
           <Center mb={10}>
             <Badge
-              leftSection={
-                <IconChisel style={{ width: rem(12), height: rem(12) }} />
-              }
+              size="md"
               color={colorForName(props.shift.shift_type_name)}
+              variant="light"
             >
               {props.shift.shift_type_name}{" "}
             </Badge>
@@ -79,7 +78,7 @@ export function ShiftCard(props: ShiftCardProps) {
             {props.shift.title}
           </Text>
           <Center mb={20}>
-            <IconClock className={classes.icon} size="1.25rem" stroke={1.5} />
+            <IconClock className={classes.icon} size="1.25rem" stroke={2} />
             <Text size="sm">
               {/* TODO: Make sure we use the same locale on both client side
               and backend side, otherwise this will cause hydration to fail.

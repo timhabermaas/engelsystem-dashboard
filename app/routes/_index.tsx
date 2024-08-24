@@ -9,6 +9,11 @@ import {
   useComputedColorScheme,
   useMantineColorScheme,
   ActionIcon,
+  Chip,
+  Button,
+  Fieldset,
+  Text,
+  Stack,
 } from "@mantine/core";
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, NavLink as NavLinkRemix } from "@remix-run/react";
@@ -16,10 +21,12 @@ import { format, parseISO } from "date-fns";
 import { NotNull } from "kysely";
 import { useState } from "react";
 import { db } from "~/db/connection";
-import { groupBy } from "~/utils";
+import { colorForName, groupBy } from "~/utils";
 import { ShiftCard } from "~/components/shift-card";
 import { SearchableMultiSelect } from "~/components/searchable-multi-select";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { IconExternalLink, IconMoon, IconSun } from "@tabler/icons-react";
+import { useSet } from "@mantine/hooks";
+import { ShiftTypeFilter } from "~/components/shift-type-filter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -114,6 +121,12 @@ export async function loader() {
     .orderBy("name")
     .execute();
 
+  const shift_types = await db
+    .selectFrom("shift_types")
+    .select(["id", "name", "description"])
+    .orderBy("name")
+    .execute();
+
   return json({
     users,
     shifts,
@@ -121,6 +134,8 @@ export async function loader() {
     needed_angel_types_by_id,
     shift_entries_by_id,
     combined_shifts,
+    shift_types,
+    engelsystem_url: process.env.ENGELSYSTEM_URL,
   });
 }
 
@@ -132,6 +147,9 @@ export default function Index() {
   const data = useLoaderData<typeof loader>();
   const [opened, setOpened] = useState<boolean>(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const selectedShiftTypes = useSet<number>(
+    data.shift_types.map((st) => st.id)
+  );
 
   const { setColorScheme } = useMantineColorScheme();
   // Actual computed value (takes auto into account)
@@ -146,6 +164,10 @@ export default function Index() {
       )
     );
   }
+
+  combined_shifts = combined_shifts.filter((s) =>
+    selectedShiftTypes.has(s.shift_type_id)
+  );
 
   const shiftsByDate = groupBy(combined_shifts, (s) =>
     format(parseISO(s.start), "yyyy-MM-dd")
@@ -171,8 +193,18 @@ export default function Index() {
           <Title order={1} size="sm" visibleFrom="xs">
             25. Freiburger Jonglierfestival
           </Title>
-          <ActionIcon
+          <Button
+            component="a"
+            href={data.engelsystem_url}
+            target="_blank"
             ml="auto"
+            variant="default"
+            size="sm"
+            leftSection={<IconExternalLink />}
+          >
+            Sign up for shift
+          </Button>
+          <ActionIcon
             onClick={() =>
               setColorScheme(computedColorScheme === "light" ? "dark" : "light")
             }
@@ -180,11 +212,7 @@ export default function Index() {
             size="lg"
             aria-label="Toggle color scheme"
           >
-            {computedColorScheme === "light" ? (
-              <IconMoon stroke={2} />
-            ) : (
-              <IconSun stroke={2} />
-            )}
+            {computedColorScheme === "light" ? <IconMoon /> : <IconSun />}
           </ActionIcon>
         </Group>
       </AppShell.Header>
@@ -203,18 +231,43 @@ export default function Index() {
         />
       </AppShell.Navbar>
       <AppShell.Main>
-        <SearchableMultiSelect
-          options={data.users.map(({ id, name }) => [id.toString(), name])}
-          onChangeOptions={(values) => {
-            setSelectedUserIds(values.map((i) => parseInt(i)));
-          }}
-        />
-        <Space mt={20} />
+        <Title ta="center" mb={20} order={1}>
+          Shift Overview
+        </Title>
+        <SimpleGrid cols={{ sm: 2 }} mb={"xl"} spacing="xl">
+          <Stack gap="xs">
+            <Text component="label" size="sm" fw={500}>
+              Angels
+            </Text>
+            <SearchableMultiSelect
+              options={data.users.map(({ id, name }) => [id.toString(), name])}
+              onChangeOptions={(values) => {
+                setSelectedUserIds(values.map((i) => parseInt(i)));
+              }}
+            />
+          </Stack>
+          <Stack>
+            <Text component="label" size="sm" fw={500}>
+              Shift Type
+            </Text>
+            <ShiftTypeFilter
+              shiftTypes={data.shift_types}
+              selected={selectedShiftTypes}
+              onChange={(id, checked) => {
+                if (checked) {
+                  selectedShiftTypes.add(id);
+                } else {
+                  selectedShiftTypes.delete(id);
+                }
+              }}
+            />
+          </Stack>
+        </SimpleGrid>
 
         {Object.entries(shiftsByDate).map(([d, shifts]) => (
           /* TODO: Move this into its own component and use targetRef inside */
           <>
-            <Title ta="center" mb={20}>
+            <Title ta="center" mb={20} order={2}>
               {format(parseISO(d), "eeee, do MMMM")}
             </Title>
             <SimpleGrid mb={40} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
