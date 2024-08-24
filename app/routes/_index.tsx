@@ -62,8 +62,6 @@ export async function loader() {
     ])
     .execute();
 
-  //const angel_types_by_id = groupBy(angel_types, (at) => at.id);
-
   const needed_angel_types = await db
     .selectFrom("needed_angel_types")
     .innerJoin(
@@ -162,7 +160,7 @@ export default function Index() {
   return (
     <>
       <Title ta="center" mb={20} order={1}>
-        Shift Overview
+        Shifts Overview
       </Title>
       <SimpleGrid cols={{ sm: 2 }} mb={"xl"} spacing="xl">
         <Stack gap="xs">
