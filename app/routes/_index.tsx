@@ -1,17 +1,8 @@
 import {
-  AppShell,
-  Burger,
-  Group,
-  NavLink,
   Title,
   SimpleGrid,
-  Space,
   useComputedColorScheme,
   useMantineColorScheme,
-  ActionIcon,
-  Chip,
-  Button,
-  Fieldset,
   Text,
   Stack,
 } from "@mantine/core";
@@ -21,10 +12,9 @@ import { format, parseISO } from "date-fns";
 import { NotNull } from "kysely";
 import { useState } from "react";
 import { db } from "~/db/connection";
-import { colorForName, groupBy } from "~/utils";
+import { groupBy } from "~/utils";
 import { ShiftCard } from "~/components/shift-card";
 import { SearchableMultiSelect } from "~/components/searchable-multi-select";
-import { IconExternalLink, IconMoon, IconSun } from "@tabler/icons-react";
 import { useSet } from "@mantine/hooks";
 import { ShiftTypeFilter } from "~/components/shift-type-filter";
 
@@ -145,15 +135,11 @@ export async function loader() {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  const [opened, setOpened] = useState<boolean>(false);
+
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const selectedShiftTypes = useSet<number>(
     data.shift_types.map((st) => st.id)
   );
-
-  const { setColorScheme } = useMantineColorScheme();
-  // Actual computed value (takes auto into account)
-  const computedColorScheme = useComputedColorScheme("light");
 
   let combined_shifts = data.combined_shifts;
 
@@ -173,111 +159,54 @@ export default function Index() {
     format(parseISO(s.start), "yyyy-MM-dd")
   );
 
-  const toggle = () => {
-    setOpened((o) => !o);
-  };
-
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 300,
-        breakpoint: "xl",
-        collapsed: { mobile: !opened, desktop: !opened },
-      }}
-      padding="md"
-    >
-      <AppShell.Header>
-        <Group h="100%" px="md" align="center">
-          <Burger opened={opened} onClick={toggle} />
-          <Title order={1} size="sm" visibleFrom="xs">
-            25. Freiburger Jonglierfestival
+    <>
+      <Title ta="center" mb={20} order={1}>
+        Shift Overview
+      </Title>
+      <SimpleGrid cols={{ sm: 2 }} mb={"xl"} spacing="xl">
+        <Stack gap="xs">
+          <Text component="label" size="sm" fw={500}>
+            Angels
+          </Text>
+          <SearchableMultiSelect
+            options={data.users.map(({ id, name }) => [id.toString(), name])}
+            onChangeOptions={(values) => {
+              setSelectedUserIds(values.map((i) => parseInt(i)));
+            }}
+          />
+        </Stack>
+        <Stack>
+          <Text component="label" size="sm" fw={500}>
+            Shift Type
+          </Text>
+          <ShiftTypeFilter
+            shiftTypes={data.shift_types}
+            selected={selectedShiftTypes}
+            onChange={(id, checked) => {
+              if (checked) {
+                selectedShiftTypes.add(id);
+              } else {
+                selectedShiftTypes.delete(id);
+              }
+            }}
+          />
+        </Stack>
+      </SimpleGrid>
+
+      {Object.entries(shiftsByDate).map(([d, shifts]) => (
+        /* TODO: Move this into its own component and use targetRef inside */
+        <>
+          <Title ta="center" mb={20} order={2}>
+            {format(parseISO(d), "eeee, do MMMM")}
           </Title>
-          <Button
-            component="a"
-            href={data.engelsystem_url}
-            target="_blank"
-            ml="auto"
-            variant="default"
-            size="sm"
-            leftSection={<IconExternalLink />}
-          >
-            Sign up for shift
-          </Button>
-          <ActionIcon
-            onClick={() =>
-              setColorScheme(computedColorScheme === "light" ? "dark" : "light")
-            }
-            variant="default"
-            size="lg"
-            aria-label="Toggle color scheme"
-          >
-            {computedColorScheme === "light" ? <IconMoon /> : <IconSun />}
-          </ActionIcon>
-        </Group>
-      </AppShell.Header>
-
-      <AppShell.Navbar p="md">
-        <Title order={3}>Navigation</Title>
-        <NavLink
-          href="/"
-          label="Overview"
-          renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
-        />
-        <NavLink
-          href="/users"
-          label="Angels"
-          renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
-        />
-      </AppShell.Navbar>
-      <AppShell.Main>
-        <Title ta="center" mb={20} order={1}>
-          Shift Overview
-        </Title>
-        <SimpleGrid cols={{ sm: 2 }} mb={"xl"} spacing="xl">
-          <Stack gap="xs">
-            <Text component="label" size="sm" fw={500}>
-              Angels
-            </Text>
-            <SearchableMultiSelect
-              options={data.users.map(({ id, name }) => [id.toString(), name])}
-              onChangeOptions={(values) => {
-                setSelectedUserIds(values.map((i) => parseInt(i)));
-              }}
-            />
-          </Stack>
-          <Stack>
-            <Text component="label" size="sm" fw={500}>
-              Shift Type
-            </Text>
-            <ShiftTypeFilter
-              shiftTypes={data.shift_types}
-              selected={selectedShiftTypes}
-              onChange={(id, checked) => {
-                if (checked) {
-                  selectedShiftTypes.add(id);
-                } else {
-                  selectedShiftTypes.delete(id);
-                }
-              }}
-            />
-          </Stack>
-        </SimpleGrid>
-
-        {Object.entries(shiftsByDate).map(([d, shifts]) => (
-          /* TODO: Move this into its own component and use targetRef inside */
-          <>
-            <Title ta="center" mb={20} order={2}>
-              {format(parseISO(d), "eeee, do MMMM")}
-            </Title>
-            <SimpleGrid mb={40} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
-              {shifts.map((s) => (
-                <ShiftCard shift={s} key={s.id} />
-              ))}
-            </SimpleGrid>
-          </>
-        ))}
-      </AppShell.Main>
-    </AppShell>
+          <SimpleGrid mb={40} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
+            {shifts.map((s) => (
+              <ShiftCard shift={s} key={s.id} />
+            ))}
+          </SimpleGrid>
+        </>
+      ))}
+    </>
   );
 }
