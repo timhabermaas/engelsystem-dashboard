@@ -1,13 +1,6 @@
-import {
-  Title,
-  SimpleGrid,
-  useComputedColorScheme,
-  useMantineColorScheme,
-  Text,
-  Stack,
-} from "@mantine/core";
+import { Title, SimpleGrid, Text, Stack } from "@mantine/core";
 import { json, type MetaFunction } from "@remix-run/node";
-import { useLoaderData, NavLink as NavLinkRemix } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { format, parseISO } from "date-fns";
 import { NotNull } from "kysely";
 import { useState } from "react";
@@ -17,6 +10,7 @@ import { ShiftCard } from "~/components/shift-card";
 import { SearchableMultiSelect } from "~/components/searchable-multi-select";
 import { useSet } from "@mantine/hooks";
 import { ShiftTypeFilter } from "~/components/shift-type-filter";
+import { TimespanSlider } from "~/components/timespan-slider";
 
 export const meta: MetaFunction = () => {
   return [
@@ -129,7 +123,6 @@ export async function loader() {
 
 // TODO:
 // * Header with fullscreen button (useFullscreen)
-// * Slider with from+to to limit date + time. eachHourOfInterval can be used to get a list of hours for the slider values.
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
@@ -139,21 +132,35 @@ export default function Index() {
     data.shift_types.map((st) => st.id)
   );
 
-  let combined_shifts = data.combined_shifts;
+  const [filterStart, setFilterStart] = useState<Date | null>(null);
+  const [filterEnd, setFilterEnd] = useState<Date | null>(null);
+
+  let filtered_shifts = data.combined_shifts;
 
   if (selectedUserIds.length > 0) {
-    combined_shifts = combined_shifts.filter((s) =>
+    filtered_shifts = filtered_shifts.filter((s) =>
       s.needed_angel_types.some((at) =>
         at.entries.some((e) => selectedUserIds.includes(e.user_id))
       )
     );
   }
 
-  combined_shifts = combined_shifts.filter((s) =>
+  filtered_shifts = filtered_shifts.filter((s) =>
     selectedShiftTypes.has(s.shift_type_id)
   );
 
-  const shiftsByDate = groupBy(combined_shifts, (s) =>
+  if (filterStart !== null) {
+    filtered_shifts = filtered_shifts.filter(
+      (s) => parseISO(s.start).getTime() >= filterStart.getTime()
+    );
+  }
+  if (filterEnd !== null) {
+    filtered_shifts = filtered_shifts.filter(
+      (s) => parseISO(s.end).getTime() <= filterEnd.getTime()
+    );
+  }
+
+  const shiftsByDate = groupBy(filtered_shifts, (s) =>
     format(parseISO(s.start), "yyyy-MM-dd")
   );
 
@@ -162,7 +169,22 @@ export default function Index() {
       <Title ta="center" mb={20} order={1}>
         Shifts Overview
       </Title>
-      <SimpleGrid cols={{ sm: 2 }} mb={"xl"} spacing="xl">
+      <SimpleGrid cols={{ sm: 2, md: 3 }} mb={"xl"} spacing="xl">
+        <Stack>
+          <Text component="label" size="sm" fw={500}>
+            Timespan
+          </Text>
+          <TimespanSlider
+            start={parseISO(data.combined_shifts[0].start)}
+            end={parseISO(
+              data.combined_shifts[data.combined_shifts.length - 1].end
+            )}
+            onChangeEnd={([start, end]) => {
+              setFilterStart(start);
+              setFilterEnd(end);
+            }}
+          />
+        </Stack>
         <Stack gap="xs">
           <Text component="label" size="sm" fw={500}>
             Angels

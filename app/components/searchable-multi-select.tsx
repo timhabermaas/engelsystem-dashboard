@@ -76,7 +76,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
                 onFocus={() => combobox.openDropdown()}
                 onBlur={() => combobox.closeDropdown()}
                 value={search}
-                placeholder="Search users"
+                placeholder="Search angels"
                 onChange={(event) => {
                   combobox.openDropdown();
                   combobox.updateSelectedOptionIndex();
