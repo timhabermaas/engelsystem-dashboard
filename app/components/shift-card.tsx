@@ -7,16 +7,9 @@ import {
   Progress,
   Stack,
   Text,
-  rem,
 } from "@mantine/core";
-import {
-  IconChisel,
-  IconClock,
-  IconMapPin,
-  IconStopwatch,
-} from "@tabler/icons-react";
+import { IconClock, IconMapPin, IconStopwatch } from "@tabler/icons-react";
 import { differenceInMinutes, format, parseISO } from "date-fns";
-import { marked } from "marked";
 import { colorForId } from "~/utils";
 import classes from "~/components/shift-card.module.css";
 
@@ -30,6 +23,7 @@ interface ShiftCardProps {
     shiftTypeId: number;
     shiftTypeName: string;
     neededAngelTypes: {
+      id: number;
       angelTypeName: string;
       count: number;
       needs: number;
@@ -51,12 +45,6 @@ interface ShiftCardProps {
 //   * [x] has
 //   * [x] list of user names
 export function ShiftCard(props: ShiftCardProps) {
-  // TODO: Display description in an overlay after touch.
-  const renderedDescription =
-    props.shift.description.length > 0
-      ? marked.parse(props.shift.description, { async: false })
-      : "";
-
   const start = parseISO(props.shift.start);
   const end = parseISO(props.shift.end);
   const durationInMin = differenceInMinutes(end, start);
@@ -89,7 +77,7 @@ export function ShiftCard(props: ShiftCardProps) {
 
           <Stack gap={10}>
             {props.shift.neededAngelTypes.map((na) => (
-              <div>
+              <div key={na.id}>
                 <Text c="dimmed" fz="sm">
                   {na.angelTypeName}:{" "}
                   <Text span c="bright">

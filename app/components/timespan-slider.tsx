@@ -1,11 +1,10 @@
-import { Button, Group, RangeSlider } from "@mantine/core";
+import { RangeSlider } from "@mantine/core";
 import {
   addHours,
   differenceInHours,
   eachDayOfInterval,
   format,
   roundToNearestHours,
-  subHours,
 } from "date-fns";
 
 interface TimespanSliderProps {
@@ -39,11 +38,6 @@ export function TimespanSlider(props: TimespanSliderProps) {
     }
   );
 
-  // Operates on hours
-  // TODO: get count of between start and end
-  // format them by adding seconds to start and using format
-  // This way we can keep the timezones working. If we'd convert to timestamps
-  // we'd have to convert back and make sure we don't lose the timezones.
   return (
     <RangeSlider
       onChangeEnd={(v) => {

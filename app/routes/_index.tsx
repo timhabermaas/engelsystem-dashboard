@@ -64,15 +64,15 @@ export async function loader() {
       "needed_angel_types.angel_type_id"
     )
     .select([
+      "needed_angel_types.id",
       "shift_id as shiftId",
-      "angel_type_id as id",
+      "angel_type_id as angelTypeId",
       "count as needs",
       "angel_types.name as angelTypeName",
     ])
     .where("shift_id", "is not", null)
     .where("angel_type_id", "is not", null)
     .$narrowType<{ shiftId: NotNull }>()
-    .$narrowType<{ id: NotNull }>()
     .execute();
 
   const neededAngelTypesById = groupBy(neededAngelTypes, (na) => na.shiftId);
@@ -85,7 +85,7 @@ export async function loader() {
   const combinedShifts = shifts.map((s) => ({
     ...s,
     neededAngelTypes: neededAngelTypesById[s.id].map((na) => {
-      const entries = shift_entries_by_id[`${s.id}-${na.id}`] ?? [];
+      const entries = shift_entries_by_id[`${s.id}-${na.angelTypeId}`] ?? [];
       return {
         ...na,
         entries,
@@ -112,9 +112,6 @@ export async function loader() {
     shiftTypes: shiftTypes,
   });
 }
-
-// TODO:
-// * Header with fullscreen button (useFullscreen)
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
@@ -205,8 +202,7 @@ export default function Index() {
       </SimpleGrid>
 
       {Object.entries(shiftsByDate).map(([d, shifts]) => (
-        /* TODO: Move this into its own component and use targetRef inside */
-        <>
+        <div key={d}>
           <Title ta="center" mb={20} order={2}>
             {format(parseISO(d), "eeee, do MMMM")}
           </Title>
@@ -215,7 +211,7 @@ export default function Index() {
               <ShiftCard shift={s} key={s.id} />
             ))}
           </SimpleGrid>
-        </>
+        </div>
       ))}
     </>
   );

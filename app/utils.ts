@@ -12,16 +12,6 @@ export function groupBy<T, K extends keyof any>(
   }, {} as Record<K, T[]>);
 }
 
-function hashCode(input: string) {
-  let hash = 0;
-  for (let i = 0; i < input.length; i += 1) {
-    const char = input.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return hash;
-}
-
 // Using pseudo random to be able to fix seed, otherwise rerenders might change color mapping.
 function pseudoRandom(seed: number): [number, number] {
   var x = Math.sin(seed++) * 10000;
