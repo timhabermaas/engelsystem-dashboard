@@ -23,17 +23,17 @@ import classes from "~/components/shift-card.module.css";
 interface ShiftCardProps {
   shift: {
     description: string;
-    location_name: string;
+    locationName: string;
     title: string;
     start: string;
     end: string;
-    shift_type_id: number;
-    shift_type_name: string;
-    needed_angel_types: {
-      angel_type_name: string;
+    shiftTypeId: number;
+    shiftTypeName: string;
+    neededAngelTypes: {
+      angelTypeName: string;
       count: number;
       needs: number;
-      entries: { id: number; user_name: string }[];
+      entries: { id: number; userName: string }[];
     }[];
   };
 }
@@ -68,10 +68,10 @@ export function ShiftCard(props: ShiftCardProps) {
           <Center mb={10}>
             <Badge
               size="md"
-              color={colorForId(props.shift.shift_type_id)}
+              color={colorForId(props.shift.shiftTypeId)}
               variant="light"
             >
-              {props.shift.shift_type_name}{" "}
+              {props.shift.shiftTypeName}{" "}
             </Badge>
           </Center>
           <Text ta="center" fw={800} mb={-1}>
@@ -88,10 +88,10 @@ export function ShiftCard(props: ShiftCardProps) {
           </Center>
 
           <Stack gap={10}>
-            {props.shift.needed_angel_types.map((na) => (
+            {props.shift.neededAngelTypes.map((na) => (
               <div>
                 <Text c="dimmed" fz="sm">
-                  {na.angel_type_name}:{" "}
+                  {na.angelTypeName}:{" "}
                   <Text span c="bright">
                     {na.count}/{na.needs}
                   </Text>
@@ -111,7 +111,7 @@ export function ShiftCard(props: ShiftCardProps) {
                       leftSection="🤹"
                       color="blue.5"
                     >
-                      {e.user_name}
+                      {e.userName}
                     </Badge>
                   ))}
                 </Group>
@@ -123,7 +123,7 @@ export function ShiftCard(props: ShiftCardProps) {
         <Group gap={8} mt={15}>
           <Center>
             <IconMapPin className={classes.icon} size="1.05rem" stroke={1.5} />
-            <Text size="xs">{props.shift.location_name}</Text>
+            <Text size="xs">{props.shift.locationName}</Text>
           </Center>
           <Center>
             <IconStopwatch

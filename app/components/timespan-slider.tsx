@@ -59,7 +59,7 @@ export function TimespanSlider(props: TimespanSliderProps) {
       min={0}
       max={diffHours}
       step={1}
-      minRange={8}
+      minRange={12}
       label={formatter}
     />
   );
