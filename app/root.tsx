@@ -59,6 +59,9 @@ export default function App() {
   const toggle = () => {
     setOpened((o) => !o);
   };
+  const navClicked = () => {
+    setOpened(false);
+  };
 
   const { setColorScheme } = useMantineColorScheme();
   // Actual computed value (takes auto into account)
@@ -110,11 +113,13 @@ export default function App() {
           href="/"
           label="Overview"
           renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
+          onClick={() => navClicked()}
         />
         <NavLink
-          href="/users"
-          label="Angels"
+          href="/stats"
+          label="Stats"
           renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
+          onClick={() => navClicked()}
         />
       </AppShell.Navbar>
       <AppShell.Main>
