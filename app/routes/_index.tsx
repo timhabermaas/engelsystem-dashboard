@@ -1,4 +1,4 @@
-import { Title, SimpleGrid, Text, Stack } from "@mantine/core";
+import { Title, SimpleGrid, Text, Stack, Group, Anchor } from "@mantine/core";
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { format, parseISO } from "date-fns";
@@ -187,9 +187,24 @@ export default function Index() {
           />
         </Stack>
         <Stack>
-          <Text component="label" size="sm" fw={500}>
-            Shift Type
-          </Text>
+          <Group justify="space-between">
+            <Text component="label" size="sm" fw={500}>
+              Shift Type
+            </Text>
+            <Group>
+              <Anchor
+                size="sm"
+                onClick={() =>
+                  data.shiftTypes.forEach((st) => selectedShiftTypes.add(st.id))
+                }
+              >
+                All
+              </Anchor>
+              <Anchor size="sm" onClick={() => selectedShiftTypes.clear()}>
+                None
+              </Anchor>
+            </Group>
+          </Group>
           <ShiftTypeFilter
             shiftTypes={data.shiftTypes}
             selected={selectedShiftTypes}
