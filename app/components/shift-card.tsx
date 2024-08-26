@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Anchor,
   Badge,
   Center,
   Group,
@@ -82,11 +81,9 @@ export function ShiftCard(props: ShiftCardProps) {
               {props.shift.shiftTypeName}{" "}
             </Badge>
           </Center>
-          <Anchor href="/" target="_blank" color="black">
-            <Text ta="center" fw={800} mb={-1}>
-              {props.shift.title}
-            </Text>
-          </Anchor>
+          <Text ta="center" fw={800} mb={-1}>
+            {props.shift.title}
+          </Text>
           <Center mb={20}>
             <IconClock className={classes.icon} size="1.25rem" stroke={2} />
             <Text size="sm">
