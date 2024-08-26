@@ -73,7 +73,7 @@ export async function loader() {
     .select(["id", "name"])
     .execute();
 
-  let hours: Map<number, { worked: number; needed: number }> = new Map();
+  const hours: Map<number, { worked: number; needed: number }> = new Map();
 
   for (const at of angelTypes) {
     let needed = 0;
@@ -110,7 +110,7 @@ export default function Stats() {
       <Title ta="center" mb={20} order={2}>
         By Angel Type
       </Title>
-      <Group justify="space-around">
+      <Group justify="space-around" mb={30}>
         {data.angelTypes.map((at) => (
           <StatsCard
             key={at.id}

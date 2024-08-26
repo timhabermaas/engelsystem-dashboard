@@ -110,6 +110,9 @@ export async function loader() {
     users,
     combinedShifts: combinedShifts,
     shiftTypes: shiftTypes,
+    env: {
+      ENGELSYSTEM_URL: process.env.ENGELSYSTEM_URL,
+    },
   });
 }
 
@@ -208,7 +211,11 @@ export default function Index() {
           </Title>
           <SimpleGrid mb={40} cols={{ lg: 4, md: 3, sm: 2, xs: 1 }}>
             {shifts.map((s) => (
-              <ShiftCard shift={s} key={s.id} />
+              <ShiftCard
+                shift={s}
+                key={s.id}
+                engelsystemUrl={`${data.env.ENGELSYSTEM_URL}/shifts?action=view&shift_id=${s.id}`}
+              />
             ))}
           </SimpleGrid>
         </div>

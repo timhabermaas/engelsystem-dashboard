@@ -1,4 +1,6 @@
 import {
+  ActionIcon,
+  Anchor,
   Badge,
   Center,
   Group,
@@ -8,7 +10,12 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { IconClock, IconMapPin, IconStopwatch } from "@tabler/icons-react";
+import {
+  IconClock,
+  IconExternalLink,
+  IconMapPin,
+  IconStopwatch,
+} from "@tabler/icons-react";
 import { differenceInMinutes, format, parseISO } from "date-fns";
 import { colorForId } from "~/utils";
 import classes from "~/components/shift-card.module.css";
@@ -30,6 +37,8 @@ interface ShiftCardProps {
       entries: { id: number; userName: string }[];
     }[];
   };
+
+  engelsystemUrl: string;
 }
 
 // Inspiration: https://ui.mantine.dev/category/stats/#stats-card
@@ -50,7 +59,18 @@ export function ShiftCard(props: ShiftCardProps) {
   const durationInMin = differenceInMinutes(end, start);
 
   return (
-    <Paper shadow="sm" radius="md" withBorder p="lg" py="lg">
+    <Paper shadow="sm" radius="md" withBorder p="lg" py="lg" pos="relative">
+      <Group justify="end" pos="absolute" p="inherit" right="0" top="0">
+        <ActionIcon
+          variant="default"
+          size="md"
+          target="_blank"
+          component="a"
+          href={props.engelsystemUrl}
+        >
+          <IconExternalLink />
+        </ActionIcon>
+      </Group>
       <Stack justify="space-between" h="100%">
         <div>
           <Center mb={10}>
@@ -62,9 +82,11 @@ export function ShiftCard(props: ShiftCardProps) {
               {props.shift.shiftTypeName}{" "}
             </Badge>
           </Center>
-          <Text ta="center" fw={800} mb={-1}>
-            {props.shift.title}
-          </Text>
+          <Anchor href="/" target="_blank" color="black">
+            <Text ta="center" fw={800} mb={-1}>
+              {props.shift.title}
+            </Text>
+          </Anchor>
           <Center mb={20}>
             <IconClock className={classes.icon} size="1.25rem" stroke={2} />
             <Text size="sm">
