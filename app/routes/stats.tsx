@@ -11,8 +11,6 @@ export async function loader() {
 
   const result = [];
   for (const at of angelTypes) {
-    console.log(`calculating for ${at.name}`);
-
     let worked = 0;
     let needed = 0;
     let overbooked = 0;
@@ -22,7 +20,6 @@ export async function loader() {
       const neededHours =
         (shift.neededAngelTypes.find((a) => a.angelTypeId == at.id)?.needs ??
           0) * hours;
-      console.log(neededHours);
 
       needed += neededHours;
     }
