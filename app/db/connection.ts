@@ -1,6 +1,6 @@
 import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2";
-import { DB } from "./db";
+import { DB } from "./schema";
 
 const databaseUri =
   process.env.DATABASE_URL ??

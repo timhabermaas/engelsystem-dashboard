@@ -1,101 +1,54 @@
-import { db } from "~/db/connection";
-import { Group, Title, NumberFormatter } from "@mantine/core";
+import { Group, Title, NumberFormatter, Text } from "@mantine/core";
 import { json, useLoaderData } from "@remix-run/react";
-import { NotNull, sql } from "kysely";
 import { StatsCard } from "~/components/stats-card";
+import { allAngelTypes, allShifts } from "~/db/repository";
+import { differenceInMinutes } from "date-fns";
 
 export async function loader() {
-  const shifts = await db
-    .selectFrom("shifts")
-    .select((eb) => [
-      "id",
-      eb(
-        eb.fn("TIMESTAMPDIFF", [
-          sql<string>`MINUTE`,
-          "shifts.start",
-          "shifts.end",
-        ]),
-        "/",
-        60
-      ).as("duration"),
-    ])
-    .$narrowType<{ duration: string }>()
-    .execute();
+  const angelTypes = await allAngelTypes();
 
-  const durationByShiftId: Map<number, number> = new Map();
-  for (const s of shifts) {
-    durationByShiftId.set(s.id, +s.duration);
-  }
+  const shifts = await allShifts();
 
-  const neededAngelTypes = await db
-    .selectFrom("needed_angel_types")
-    .select(["shift_id", "angel_type_id", "count"])
-    .$narrowType<{ shift_id: NotNull; angel_type_id: NotNull }>()
-    .execute();
-
-  // All the following nested maps map from angel_type_id -> shift_id -> duration
-  const neededHoursAngelTypeIdShiftId: Map<
-    number,
-    Map<number, number>
-  > = new Map();
-  for (const na of neededAngelTypes) {
-    const shiftsMap =
-      neededHoursAngelTypeIdShiftId.get(na.angel_type_id) ?? new Map();
-
-    shiftsMap.set(na.shift_id, na.count * durationByShiftId.get(na.shift_id)!);
-
-    neededHoursAngelTypeIdShiftId.set(na.angel_type_id, shiftsMap);
-  }
-  // TODO: save the mapping from (shift_id,angel_type_id) => number as well to make sure we're not overcounting
-
-  const shiftEntries = await db
-    .selectFrom("shift_entries")
-    .select(["shift_id", "angel_type_id"])
-    .execute();
-
-  const loggedEntriesMap: Map<number, Map<number, number>> = new Map();
-  for (const se of shiftEntries) {
-    const shiftsMap = loggedEntriesMap.get(se.angel_type_id) ?? new Map();
-    let duration = shiftsMap.get(se.shift_id) ?? 0;
-    duration += durationByShiftId.get(se.shift_id)!;
-    const shiftsMapNeeded = neededHoursAngelTypeIdShiftId.get(se.angel_type_id);
-    const limit = shiftsMapNeeded && shiftsMapNeeded.get(se.shift_id);
-
-    if (limit && duration > limit) {
-      duration = limit;
-    }
-    shiftsMap.set(se.shift_id, duration);
-    loggedEntriesMap.set(se.angel_type_id, shiftsMap);
-  }
-
-  const angelTypes = await db
-    .selectFrom("angel_types")
-    .select(["id", "name"])
-    .execute();
-
-  const hours: Map<number, { worked: number; needed: number }> = new Map();
-
+  const result = [];
   for (const at of angelTypes) {
-    let needed = 0;
-    for (const [_, value] of neededHoursAngelTypeIdShiftId.get(at.id) ??
-      new Map()) {
-      needed += value;
-    }
+    console.log(`calculating for ${at.name}`);
 
     let worked = 0;
-    for (const [_, value] of loggedEntriesMap.get(at.id) ?? new Map()) {
-      worked += value;
+    let needed = 0;
+    let overbooked = 0;
+
+    for (const shift of shifts) {
+      const hours = differenceInMinutes(shift.end, shift.start) / 60;
+      const neededHours =
+        (shift.neededAngelTypes.find((a) => a.angelTypeId == at.id)?.needs ??
+          0) * hours;
+      console.log(neededHours);
+
+      needed += neededHours;
     }
 
-    hours.set(at.id, { worked, needed });
+    for (const shift of shifts) {
+      const hours = differenceInMinutes(shift.end, shift.start) / 60;
+      const reservedHours =
+        (shift.neededAngelTypes.find((a) => a.angelTypeId == at.id)?.count ??
+          0) * hours;
+      const neededHours =
+        (shift.neededAngelTypes.find((a) => a.angelTypeId == at.id)?.needs ??
+          0) * hours;
+
+      if (reservedHours > neededHours) {
+        worked += neededHours;
+        overbooked += reservedHours - neededHours;
+      } else {
+        worked += reservedHours;
+      }
+    }
+
+    result.push({ id: at.id, name: at.name, needed, worked, overbooked });
   }
 
   return json({
-    angelTypes: angelTypes.map((at) => ({
-      ...at,
-      needed: hours.get(at.id)!.needed,
-      worked: hours.get(at.id)!.worked,
-    })),
+    angelTypes: result,
   });
 }
 
@@ -124,6 +77,14 @@ export default function Stats() {
                   decimalScale={0}
                   suffix="h"
                 />
+                <Text span size="sm" fw={600}>
+                  {" + "}
+                  <NumberFormatter
+                    value={at.overbooked}
+                    decimalScale={0}
+                    suffix="h"
+                  />
+                </Text>
                 {" / "}
                 <NumberFormatter
                   value={at.needed}
