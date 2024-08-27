@@ -10,7 +10,6 @@ import {
   json,
 } from "@remix-run/react";
 import {
-  ActionIcon,
   AppShell,
   Burger,
   Button,
@@ -19,11 +18,10 @@ import {
   MantineProvider,
   NavLink,
   Title,
-  useComputedColorScheme,
-  useMantineColorScheme,
 } from "@mantine/core";
-import { IconExternalLink, IconMoon, IconSun } from "@tabler/icons-react";
+import { IconExternalLink } from "@tabler/icons-react";
 import { useState } from "react";
+import { DarkModeToggle } from "./components/dark-mode-toggle";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -63,10 +61,6 @@ export default function App() {
     setOpened(false);
   };
 
-  const { setColorScheme } = useMantineColorScheme();
-  // Actual computed value (takes auto into account)
-  const computedColorScheme = useComputedColorScheme("light");
-
   return (
     <AppShell
       header={{ height: 60 }}
@@ -94,16 +88,7 @@ export default function App() {
           >
             Sign up for shift
           </Button>
-          <ActionIcon
-            onClick={() =>
-              setColorScheme(computedColorScheme === "light" ? "dark" : "light")
-            }
-            variant="default"
-            size="lg"
-            aria-label="Toggle color scheme"
-          >
-            {computedColorScheme === "light" ? <IconMoon /> : <IconSun />}
-          </ActionIcon>
+          <DarkModeToggle />
         </Group>
       </AppShell.Header>
 
