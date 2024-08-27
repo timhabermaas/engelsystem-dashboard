@@ -106,10 +106,17 @@ export async function loader() {
     .orderBy("name")
     .execute();
 
+  const angelTypes = await db
+    .selectFrom("angel_types")
+    .select(["id", "name"])
+    .orderBy("name")
+    .execute();
+
   return json({
     users,
-    combinedShifts: combinedShifts,
-    shiftTypes: shiftTypes,
+    combinedShifts,
+    shiftTypes,
+    angelTypes,
     env: {
       ENGELSYSTEM_URL: process.env.ENGELSYSTEM_URL,
     },
@@ -121,6 +128,8 @@ export default function Index() {
 
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const selectedShiftTypes = useSet<number>(data.shiftTypes.map((st) => st.id));
+
+  const selectedAngelTypes = useSet<number>(data.angelTypes.map((at) => at.id));
 
   const [filterStart, setFilterStart] = useState<Date | null>(null);
   const [filterEnd, setFilterEnd] = useState<Date | null>(null);
@@ -137,6 +146,10 @@ export default function Index() {
 
   filteredShifts = filteredShifts.filter((s) =>
     selectedShiftTypes.has(s.shiftTypeId)
+  );
+
+  filteredShifts = filteredShifts.filter((s) =>
+    s.neededAngelTypes.some((nat) => selectedAngelTypes.has(nat.angelTypeId))
   );
 
   if (filterStart !== null) {
@@ -159,7 +172,7 @@ export default function Index() {
       <Title ta="center" mb={20} order={1}>
         Shifts Overview
       </Title>
-      <SimpleGrid cols={{ sm: 2, md: 3 }} mb={"xl"} spacing="xl">
+      <SimpleGrid cols={{ xs: 2, sm: 2, lg: 4 }} mb={"xl"} spacing="xl">
         <Stack>
           <Text component="label" size="sm" fw={500}>
             Timespan
@@ -213,6 +226,39 @@ export default function Index() {
                 selectedShiftTypes.add(id);
               } else {
                 selectedShiftTypes.delete(id);
+              }
+            }}
+          />
+        </Stack>
+        <Stack>
+          <Group justify="space-between">
+            <Text component="label" size="sm" fw={500}>
+              Angel Type
+            </Text>
+            <Group>
+              <Anchor
+                size="sm"
+                onClick={() =>
+                  data.angelTypes.forEach((at) => selectedAngelTypes.add(at.id))
+                }
+              >
+                All
+              </Anchor>
+              <Anchor size="sm" onClick={() => selectedAngelTypes.clear()}>
+                None
+              </Anchor>
+            </Group>
+          </Group>
+
+          <ShiftTypeFilter
+            color="black"
+            shiftTypes={data.angelTypes}
+            selected={selectedAngelTypes}
+            onChange={(id, checked) => {
+              if (checked) {
+                selectedAngelTypes.add(id);
+              } else {
+                selectedAngelTypes.delete(id);
               }
             }}
           />
