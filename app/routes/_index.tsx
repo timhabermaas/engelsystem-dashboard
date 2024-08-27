@@ -251,7 +251,7 @@ export default function Index() {
           </Group>
 
           <ShiftTypeFilter
-            color="black"
+            color="blue"
             shiftTypes={data.angelTypes}
             selected={selectedAngelTypes}
             onChange={(id, checked) => {
