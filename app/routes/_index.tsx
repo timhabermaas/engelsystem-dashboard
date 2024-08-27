@@ -10,7 +10,7 @@ import { SearchableMultiSelect } from "~/components/searchable-multi-select";
 import { useSet } from "@mantine/hooks";
 import { ShiftTypeFilter } from "~/components/shift-type-filter";
 import { TimespanSlider } from "~/components/timespan-slider";
-import { allShifts } from "~/db/repository";
+import { allAngelTypes, allShifts, allShiftTypes } from "~/db/repository";
 
 export const meta: MetaFunction = () => {
   return [
@@ -31,17 +31,9 @@ export async function loader() {
     .orderBy("name")
     .execute();
 
-  const shiftTypes = await db
-    .selectFrom("shift_types")
-    .select(["id", "name", "description"])
-    .orderBy("name")
-    .execute();
+  const shiftTypes = await allShiftTypes();
 
-  const angelTypes = await db
-    .selectFrom("angel_types")
-    .select(["id", "name"])
-    .orderBy("name")
-    .execute();
+  const angelTypes = await allAngelTypes();
 
   return json({
     users,

@@ -98,5 +98,23 @@ interface AngelType {
 }
 
 export async function allAngelTypes(): Promise<AngelType[]> {
-  return await db.selectFrom("angel_types").select(["id", "name"]).execute();
+  return await db
+    .selectFrom("angel_types")
+    .select(["id", "name"])
+    .orderBy("name")
+    .execute();
+}
+
+interface ShiftType {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export async function allShiftTypes(): Promise<ShiftType[]> {
+  return await db
+    .selectFrom("shift_types")
+    .select(["id", "name", "description"])
+    .orderBy("name")
+    .execute();
 }
