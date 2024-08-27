@@ -56,17 +56,6 @@ export async function loader() {
         continue;
       }
       const hours = differenceInMinutes(shift.end, shift.start) / 60;
-      const neededHours =
-        shift.neededAngelTypes.reduce((acc, nat) => acc + nat.needs, 0) * hours;
-
-      needed += neededHours;
-    }
-
-    for (const shift of shifts) {
-      if (shift.shiftTypeId !== st.id) {
-        continue;
-      }
-      const hours = differenceInMinutes(shift.end, shift.start) / 60;
       shift.neededAngelTypes
         .map((nat) => {
           if (nat.count > nat.needs) {
