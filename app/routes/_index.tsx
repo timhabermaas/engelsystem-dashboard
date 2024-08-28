@@ -1,5 +1,5 @@
 import { Title, SimpleGrid, Text, Stack, Group, Anchor } from "@mantine/core";
-import { json, type MetaFunction } from "@remix-run/node";
+import { json, LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
@@ -11,6 +11,8 @@ import { useSet } from "@mantine/hooks";
 import { ShiftTypeFilter } from "~/components/shift-type-filter";
 import { TimespanSlider } from "~/components/timespan-slider";
 import { allAngelTypes, allShifts, allShiftTypes } from "~/db/repository";
+import { FutureSwitch } from "~/components/future-switch";
+import { parseFilterParams } from "~/hooks/use-filter-params";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,8 +24,11 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader() {
-  const combinedShifts = await allShifts({ ongoing: false });
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const filterParams = parseFilterParams(url.searchParams);
+
+  const combinedShifts = await allShifts({ ongoing: filterParams.ongoing });
 
   const users = await db
     .selectFrom("users")
@@ -93,23 +98,26 @@ export default function Index() {
   return (
     <>
       <Title ta="center" mb={20} order={1}>
-        Shifts Overview
+        Shifts
       </Title>
       <SimpleGrid cols={{ xs: 2, sm: 2, lg: 4 }} mb={"xl"} spacing="xl">
         <Stack>
           <Text component="label" size="sm" fw={500}>
             Timespan
           </Text>
-          <TimespanSlider
-            start={parseISO(data.combinedShifts[0].start)}
-            end={parseISO(
-              data.combinedShifts[data.combinedShifts.length - 1].end
-            )}
-            onChangeEnd={([start, end]) => {
-              setFilterStart(start);
-              setFilterEnd(end);
-            }}
-          />
+          <Stack gap={35}>
+            <TimespanSlider
+              start={parseISO(data.combinedShifts[0].start)}
+              end={parseISO(
+                data.combinedShifts[data.combinedShifts.length - 1].end
+              )}
+              onChangeEnd={([start, end]) => {
+                setFilterStart(start);
+                setFilterEnd(end);
+              }}
+            />
+            <FutureSwitch size="sm" />
+          </Stack>
         </Stack>
         <Stack gap="xs">
           <Text component="label" size="sm" fw={500}>

@@ -5,22 +5,22 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
   NavLink as NavLinkRemix,
-  json,
+  useRevalidator,
 } from "@remix-run/react";
 import {
   AppShell,
   Burger,
-  Button,
   ColorSchemeScript,
   Group,
   MantineProvider,
   NavLink,
+  rem,
+  Switch,
   Title,
 } from "@mantine/core";
-import { IconExternalLink } from "@tabler/icons-react";
-import { useState } from "react";
+import { IconRefresh } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { DarkModeToggle } from "./components/dark-mode-toggle";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -42,16 +42,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export async function loader() {
-  return json({
-    ENV: {
-      ENGELSYSTEM_URL: process.env.ENGELSYSTEM_URL,
-    },
-  });
-}
-
 export default function App() {
-  const data = useLoaderData<typeof loader>();
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+
+  const revalidator = useRevalidator();
+
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        revalidator.revalidate();
+      }, 30000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [autoRefresh]);
 
   const [opened, setOpened] = useState<boolean>(false);
   const toggle = () => {
@@ -77,17 +83,20 @@ export default function App() {
           <Title order={1} size="sm" visibleFrom="xs">
             25. Freiburger Jonglierfestival
           </Title>
-          <Button
-            component="a"
-            href={data.ENV.ENGELSYSTEM_URL}
-            target="_blank"
+          <Switch
+            checked={autoRefresh}
+            onChange={(event) => setAutoRefresh(event.currentTarget.checked)}
+            size="xl"
+            onLabel="ON"
+            offLabel="OFF"
+            thumbIcon={
+              <IconRefresh
+                color="gray"
+                style={{ width: rem(14), height: rem(14) }}
+              />
+            }
             ml="auto"
-            variant="default"
-            size="sm"
-            leftSection={<IconExternalLink />}
-          >
-            Sign up for shift
-          </Button>
+          />
           <DarkModeToggle />
         </Group>
       </AppShell.Header>
@@ -96,7 +105,7 @@ export default function App() {
         <Title order={3}>Navigation</Title>
         <NavLink
           href="/"
-          label="Overview"
+          label="Shifts"
           renderRoot={(props) => <NavLinkRemix to={props.href} {...props} />}
           onClick={() => navClicked()}
         />

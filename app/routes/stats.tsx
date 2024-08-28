@@ -4,16 +4,18 @@ import { StatsCard } from "~/components/stats-card";
 import { allAngelTypes, allShifts, allShiftTypes } from "~/db/repository";
 import { differenceInMinutes } from "date-fns";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { FutureSlider } from "~/components/future-slider";
+import { FutureSwitch } from "~/components/future-switch";
+import { parseFilterParams } from "~/hooks/use-filter-params";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
+  const filterParams = parseFilterParams(url.searchParams);
 
   const angelTypes = await allAngelTypes();
   const shiftTypes = await allShiftTypes();
 
   const shifts = await allShifts({
-    ongoing: url.searchParams.get("ongoing") == "true",
+    ongoing: filterParams.ongoing
   });
 
   const byAngelTypes = [];
@@ -103,7 +105,7 @@ export default function Stats() {
         Stats
       </Title>
       <Group justify="center" mb={30}>
-        <FutureSlider />
+        <FutureSwitch size="lg" />
       </Group>
       <Title ta="center" mb={20} order={2}>
         By Angel Type
