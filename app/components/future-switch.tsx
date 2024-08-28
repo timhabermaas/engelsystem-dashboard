@@ -1,4 +1,5 @@
 import { MantineSize, Switch } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { useFilterParams } from "~/hooks/use-filter-params";
 
 interface FutureSwitchProps {
@@ -8,20 +9,28 @@ interface FutureSwitchProps {
 export function FutureSwitch(props: FutureSwitchProps) {
   const [filterParams, setFilterParams] = useFilterParams();
 
-  // TODO: Make it optimistic UI update. It currently waits for a server
-  // roundtrip until the switch is flipped.
+  const [checked, setChecked] = useState<boolean>(filterParams.ongoing);
+
+  // The only reason for internal state is to enable an optimistic UI. If we go
+  // through the entire "change search params", "rerender", "update switch
+  // according to search params" workflow toggling the switch lags. So we
+  // toggle it immediately and move rerendering/filtering to the next
+  // iteration.
+  useEffect(() => {
+    setFilterParams((old) => {
+      old.ongoing = checked;
+
+      return old;
+    });
+  }, [checked]);
 
   return (
     <Switch
       label="Present shifts only"
-      checked={filterParams.ongoing}
+      checked={checked}
       size={props.size ?? "md"}
       onChange={(event) => {
-        setFilterParams((old) => {
-          old.ongoing = event.currentTarget.checked;
-
-          return old;
-        });
+        setChecked(event.currentTarget.checked);
       }}
     />
   );
