@@ -23,7 +23,7 @@ interface Shift {
 }
 
 interface AllShiftsParams {
-  inFuture: boolean;
+  ongoing: boolean;
 }
 
 export async function allShifts(params: AllShiftsParams): Promise<Shift[]> {
@@ -46,7 +46,7 @@ export async function allShifts(params: AllShiftsParams): Promise<Shift[]> {
     ])
     .orderBy("shifts.start");
 
-  if (params.inFuture) {
+  if (params.ongoing) {
     const eventTimezone = process.env.EVENT_TZ ?? "UTC";
     const formattedNow = formatInTimeZone(
       new Date(),

@@ -13,7 +13,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const shiftTypes = await allShiftTypes();
 
   const shifts = await allShifts({
-    inFuture: url.searchParams.get("future") == "true",
+    ongoing: url.searchParams.get("ongoing") == "true",
   });
 
   const byAngelTypes = [];

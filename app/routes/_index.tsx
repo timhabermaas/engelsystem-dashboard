@@ -23,7 +23,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader() {
-  const combinedShifts = await allShifts({ inFuture: false });
+  const combinedShifts = await allShifts({ ongoing: false });
 
   const users = await db
     .selectFrom("users")

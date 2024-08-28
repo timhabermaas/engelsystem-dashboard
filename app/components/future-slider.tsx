@@ -7,13 +7,13 @@ export function FutureSlider() {
   return (
     <Switch
       label="Present shifts only"
-      checked={searchParams.get("future") === "true"}
+      checked={searchParams.get("ongoing") === "true"}
       size="lg"
       onChange={(event) => {
         if (event.currentTarget.checked) {
           setSearchParams(
             (params) => {
-              params.set("future", "true");
+              params.set("ongoing", "true");
               return params;
             },
             { preventScrollReset: true }
@@ -21,7 +21,7 @@ export function FutureSlider() {
         } else {
           setSearchParams(
             (params) => {
-              params.set("future", "false");
+              params.set("ongoing", "false");
               return params;
             },
             { preventScrollReset: true }
