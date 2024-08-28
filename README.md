@@ -45,3 +45,4 @@ The node process requires the following environment variables to be set:
 
 * `ENGELSYSTEM_URL`: Points to the Engelsystem installation, used to link to it. Including http protocol and without trailing `/`.
 * `DATABASE_URL`: Points to Engelsystem's MariaDB database. Format: `mysql://<username>:<password>@<host>:<port>/<database>`
+* `EVENT_TZ`: Timezone of the event and timezone in which the database entries are saved, e.g. `Europe/Berlin`

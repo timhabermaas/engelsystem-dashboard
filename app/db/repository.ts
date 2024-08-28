@@ -1,6 +1,7 @@
-import { NotNull } from "kysely";
+import { NotNull, sql } from "kysely";
 import { db } from "./connection";
 import { groupBy } from "~/utils";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface Shift {
   id: number;
@@ -21,8 +22,12 @@ interface Shift {
   }[];
 }
 
-export async function allShifts(): Promise<Shift[]> {
-  const shifts = await db
+interface AllShiftsParams {
+  inFuture: boolean;
+}
+
+export async function allShifts(params: AllShiftsParams): Promise<Shift[]> {
+  let shiftQuery = db
     .selectFrom("shifts")
     .innerJoin("locations", "locations.id", "shifts.location_id")
     .innerJoin("shift_types", "shift_types.id", "shifts.shift_type_id")
@@ -39,8 +44,25 @@ export async function allShifts(): Promise<Shift[]> {
       "shift_types.id as shiftTypeId",
       "shift_types.name as shiftTypeName",
     ])
-    .orderBy("shifts.start")
-    .execute();
+    .orderBy("shifts.start");
+
+  if (params.inFuture) {
+    const eventTimezone = process.env.EVENT_TZ ?? "UTC";
+    const formattedNow = formatInTimeZone(
+      new Date(),
+      eventTimezone,
+      "yyyy-MM-dd hh:mm:ss"
+    );
+    // Manually constructing the date string since passing in `new Date()`
+    // will mess up the timezones since the values stored in the DB are local dates, not UTC.
+    shiftQuery = shiftQuery.where(
+      "shifts.end",
+      ">",
+      sql<Date>`${formattedNow}`
+    );
+  }
+
+  const shifts = await shiftQuery.execute();
 
   const neededAngelTypes = await db
     .selectFrom("needed_angel_types")

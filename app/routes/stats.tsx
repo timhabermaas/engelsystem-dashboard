@@ -3,12 +3,18 @@ import { json, useLoaderData } from "@remix-run/react";
 import { StatsCard } from "~/components/stats-card";
 import { allAngelTypes, allShifts, allShiftTypes } from "~/db/repository";
 import { differenceInMinutes } from "date-fns";
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { FutureSlider } from "~/components/future-slider";
 
-export async function loader() {
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+
   const angelTypes = await allAngelTypes();
   const shiftTypes = await allShiftTypes();
 
-  const shifts = await allShifts();
+  const shifts = await allShifts({
+    inFuture: url.searchParams.get("future") == "true",
+  });
 
   const byAngelTypes = [];
   for (const at of angelTypes) {
@@ -96,6 +102,9 @@ export default function Stats() {
       <Title ta="center" mb={20} order={1}>
         Stats
       </Title>
+      <Group justify="center" mb={30}>
+        <FutureSlider />
+      </Group>
       <Title ta="center" mb={20} order={2}>
         By Angel Type
       </Title>
