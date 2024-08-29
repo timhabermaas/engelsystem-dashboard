@@ -2,7 +2,7 @@ import { Chip, DefaultMantineColor, Group } from "@mantine/core";
 import { colorForId } from "~/utils";
 
 interface ShiftTypeFilterProps {
-  shiftTypes: { id: number; name: string }[];
+  values: { id: number; name: string }[];
   selected: Set<number>;
   onChange: (id: number, checked: boolean) => void;
   /** If not set the color will be determined according to the id */
@@ -12,7 +12,7 @@ interface ShiftTypeFilterProps {
 export function ShiftTypeFilter(props: ShiftTypeFilterProps) {
   return (
     <Group gap="xs" align="center">
-      {props.shiftTypes.map((st) => (
+      {props.values.map((st) => (
         <Chip
           checked={props.selected.has(st.id)}
           variant="light"

@@ -59,6 +59,8 @@ export default function Index() {
 
   const selectedAngelTypes = useSet<number>(data.angelTypes.map((at) => at.id));
 
+  const selectedOccupancy = useSet<number>([1, 2]);
+
   const [filterStart, setFilterStart] = useState<Date | null>(null);
   const [filterEnd, setFilterEnd] = useState<Date | null>(null);
 
@@ -79,6 +81,18 @@ export default function Index() {
   filteredShifts = filteredShifts.filter((s) =>
     s.neededAngelTypes.some((nat) => selectedAngelTypes.has(nat.angelTypeId))
   );
+
+  filteredShifts = filteredShifts.filter((s) => {
+    if (selectedOccupancy.has(1) && !selectedOccupancy.has(2)) {
+      return s.neededAngelTypes.every((nat) => nat.count >= nat.needs);
+    } else if (!selectedOccupancy.has(1) && selectedOccupancy.has(2)) {
+      return s.neededAngelTypes.some((nat) => nat.count < nat.needs);
+    } else if (selectedOccupancy.size === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  });
 
   if (filterStart !== null) {
     filteredShifts = filteredShifts.filter(
@@ -150,7 +164,7 @@ export default function Index() {
             </Group>
           </Group>
           <ShiftTypeFilter
-            shiftTypes={data.shiftTypes}
+            values={data.shiftTypes}
             selected={selectedShiftTypes}
             onChange={(id, checked) => {
               if (checked) {
@@ -183,13 +197,49 @@ export default function Index() {
 
           <ShiftTypeFilter
             color="blue"
-            shiftTypes={data.angelTypes}
+            values={data.angelTypes}
             selected={selectedAngelTypes}
             onChange={(id, checked) => {
               if (checked) {
                 selectedAngelTypes.add(id);
               } else {
                 selectedAngelTypes.delete(id);
+              }
+            }}
+          />
+        </Stack>
+        <Stack>
+          <Group justify="space-between">
+            <Text component="label" size="sm" fw={500}>
+              Occupancy
+            </Text>
+            <Group>
+              <Anchor
+                size="sm"
+                onClick={() =>
+                  data.shiftTypes.forEach((st) => selectedOccupancy.add(st.id))
+                }
+              >
+                All
+              </Anchor>
+              <Anchor size="sm" onClick={() => selectedOccupancy.clear()}>
+                None
+              </Anchor>
+            </Group>
+          </Group>
+
+          <ShiftTypeFilter
+            color="blue"
+            values={[
+              { id: 1, name: "Occupied" },
+              { id: 2, name: "Free" },
+            ]}
+            selected={selectedOccupancy}
+            onChange={(id, checked) => {
+              if (checked) {
+                selectedOccupancy.add(id);
+              } else {
+                selectedOccupancy.delete(id);
               }
             }}
           />
