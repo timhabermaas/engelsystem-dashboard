@@ -51,7 +51,7 @@ export async function allShifts(params: AllShiftsParams): Promise<Shift[]> {
     const formattedNow = formatInTimeZone(
       new Date(),
       eventTimezone,
-      "yyyy-MM-dd hh:mm:ss"
+      "yyyy-MM-dd HH:mm:ss"
     );
     // Manually constructing the date string since passing in `new Date()`
     // will mess up the timezones since the values stored in the DB are local dates, not UTC.
