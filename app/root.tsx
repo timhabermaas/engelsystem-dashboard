@@ -9,6 +9,7 @@ import {
   useRevalidator,
 } from "@remix-run/react";
 import {
+  ActionIcon,
   AppShell,
   Burger,
   ColorSchemeScript,
@@ -19,9 +20,14 @@ import {
   Switch,
   Title,
 } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import {
+  IconArrowsMaximize,
+  IconArrowsMinimize,
+  IconRefresh,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { DarkModeToggle } from "./components/dark-mode-toggle";
+import { useFullscreen } from "@mantine/hooks";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -44,6 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const { toggle: toggleFullscreen, fullscreen } = useFullscreen();
 
   const revalidator = useRevalidator();
 
@@ -98,6 +105,16 @@ export default function App() {
             ml="auto"
           />
           <DarkModeToggle />
+          <ActionIcon
+            variant="default"
+            size="lg"
+            onClick={() => {
+              toggleFullscreen();
+            }}
+          >
+            {!fullscreen && <IconArrowsMaximize />}
+            {fullscreen && <IconArrowsMinimize />}
+          </ActionIcon>
         </Group>
       </AppShell.Header>
 
