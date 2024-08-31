@@ -1,4 +1,12 @@
-import { Title, SimpleGrid, Text, Stack, Group, Anchor } from "@mantine/core";
+import {
+  Title,
+  SimpleGrid,
+  Text,
+  Stack,
+  Group,
+  Anchor,
+  Accordion,
+} from "@mantine/core";
 import { json, LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { format, parseISO } from "date-fns";
@@ -111,140 +119,161 @@ export default function Index() {
 
   return (
     <>
-      <Title ta="center" mb={20} order={1}>
-        Shifts
-      </Title>
-      <SimpleGrid cols={{ xs: 2, sm: 2, lg: 4 }} mb={"xl"} spacing="xl">
-        <Stack>
-          <Text component="label" size="sm" fw={500}>
-            Timespan
-          </Text>
-          <Stack gap={35}>
-            <TimespanSlider
-              start={parseISO(data.combinedShifts[0].start)}
-              end={parseISO(
-                data.combinedShifts[data.combinedShifts.length - 1].end
-              )}
-              onChangeEnd={([start, end]) => {
-                setFilterStart(start);
-                setFilterEnd(end);
-              }}
-            />
-            <FutureSwitch size="sm" />
-          </Stack>
-        </Stack>
-        <Stack gap="xs">
-          <Text component="label" size="sm" fw={500}>
-            Angels
-          </Text>
-          <SearchableMultiSelect
-            options={data.users.map(({ id, name }) => [id.toString(), name])}
-            onChangeOptions={(values) => {
-              setSelectedUserIds(values.map((i) => parseInt(i)));
-            }}
-          />
-        </Stack>
-        <Stack>
-          <Group justify="space-between">
-            <Text component="label" size="sm" fw={500}>
-              Shift Type
-            </Text>
-            <Group>
-              <Anchor
-                size="sm"
-                onClick={() =>
-                  data.shiftTypes.forEach((st) => selectedShiftTypes.add(st.id))
-                }
-              >
-                All
-              </Anchor>
-              <Anchor size="sm" onClick={() => selectedShiftTypes.clear()}>
-                None
-              </Anchor>
-            </Group>
-          </Group>
-          <ShiftTypeFilter
-            values={data.shiftTypes}
-            selected={selectedShiftTypes}
-            onChange={(id, checked) => {
-              if (checked) {
-                selectedShiftTypes.add(id);
-              } else {
-                selectedShiftTypes.delete(id);
-              }
-            }}
-          />
-        </Stack>
-        <Stack>
-          <Group justify="space-between">
-            <Text component="label" size="sm" fw={500}>
-              Angel Type
-            </Text>
-            <Group>
-              <Anchor
-                size="sm"
-                onClick={() =>
-                  data.angelTypes.forEach((at) => selectedAngelTypes.add(at.id))
-                }
-              >
-                All
-              </Anchor>
-              <Anchor size="sm" onClick={() => selectedAngelTypes.clear()}>
-                None
-              </Anchor>
-            </Group>
-          </Group>
+      <Accordion defaultValue="foo" mb={30}>
+        <Accordion.Item value="foo">
+          <Accordion.Control>
+            <Title order={3}>Filter</Title>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <SimpleGrid cols={{ xs: 2, sm: 2, lg: 4 }} mb={"xl"} spacing="xl">
+              <Stack>
+                <Text component="label" size="sm" fw={500}>
+                  Timespan
+                </Text>
+                <Stack gap={35}>
+                  <TimespanSlider
+                    start={parseISO(data.combinedShifts[0].start)}
+                    end={parseISO(
+                      data.combinedShifts[data.combinedShifts.length - 1].end
+                    )}
+                    onChangeEnd={([start, end]) => {
+                      setFilterStart(start);
+                      setFilterEnd(end);
+                    }}
+                  />
+                  <FutureSwitch size="sm" />
+                </Stack>
+              </Stack>
+              <Stack gap="xs">
+                <Text component="label" size="sm" fw={500}>
+                  Angels
+                </Text>
+                <SearchableMultiSelect
+                  options={data.users.map(({ id, name }) => [
+                    id.toString(),
+                    name,
+                  ])}
+                  onChangeOptions={(values) => {
+                    setSelectedUserIds(values.map((i) => parseInt(i)));
+                  }}
+                />
+              </Stack>
+              <Stack>
+                <Group justify="space-between">
+                  <Text component="label" size="sm" fw={500}>
+                    Shift Type
+                  </Text>
+                  <Group>
+                    <Anchor
+                      size="sm"
+                      onClick={() =>
+                        data.shiftTypes.forEach((st) =>
+                          selectedShiftTypes.add(st.id)
+                        )
+                      }
+                    >
+                      All
+                    </Anchor>
+                    <Anchor
+                      size="sm"
+                      onClick={() => selectedShiftTypes.clear()}
+                    >
+                      None
+                    </Anchor>
+                  </Group>
+                </Group>
+                <ShiftTypeFilter
+                  values={data.shiftTypes}
+                  selected={selectedShiftTypes}
+                  onChange={(id, checked) => {
+                    if (checked) {
+                      selectedShiftTypes.add(id);
+                    } else {
+                      selectedShiftTypes.delete(id);
+                    }
+                  }}
+                />
+              </Stack>
+              <Stack>
+                <Group justify="space-between">
+                  <Text component="label" size="sm" fw={500}>
+                    Angel Type
+                  </Text>
+                  <Group>
+                    <Anchor
+                      size="sm"
+                      onClick={() =>
+                        data.angelTypes.forEach((at) =>
+                          selectedAngelTypes.add(at.id)
+                        )
+                      }
+                    >
+                      All
+                    </Anchor>
+                    <Anchor
+                      size="sm"
+                      onClick={() => selectedAngelTypes.clear()}
+                    >
+                      None
+                    </Anchor>
+                  </Group>
+                </Group>
 
-          <ShiftTypeFilter
-            color="blue"
-            values={data.angelTypes}
-            selected={selectedAngelTypes}
-            onChange={(id, checked) => {
-              if (checked) {
-                selectedAngelTypes.add(id);
-              } else {
-                selectedAngelTypes.delete(id);
-              }
-            }}
-          />
-        </Stack>
-        <Stack>
-          <Group justify="space-between">
-            <Text component="label" size="sm" fw={500}>
-              Occupancy
-            </Text>
-            <Group>
-              <Anchor
-                size="sm"
-                onClick={() =>
-                  data.shiftTypes.forEach((st) => selectedOccupancy.add(st.id))
-                }
-              >
-                All
-              </Anchor>
-              <Anchor size="sm" onClick={() => selectedOccupancy.clear()}>
-                None
-              </Anchor>
-            </Group>
-          </Group>
+                <ShiftTypeFilter
+                  color="blue"
+                  values={data.angelTypes}
+                  selected={selectedAngelTypes}
+                  onChange={(id, checked) => {
+                    if (checked) {
+                      selectedAngelTypes.add(id);
+                    } else {
+                      selectedAngelTypes.delete(id);
+                    }
+                  }}
+                />
+              </Stack>
+              <Stack>
+                <Group justify="space-between">
+                  <Text component="label" size="sm" fw={500}>
+                    Occupancy
+                  </Text>
+                  <Group>
+                    <Anchor
+                      size="sm"
+                      onClick={() =>
+                        data.shiftTypes.forEach((st) =>
+                          selectedOccupancy.add(st.id)
+                        )
+                      }
+                    >
+                      All
+                    </Anchor>
+                    <Anchor size="sm" onClick={() => selectedOccupancy.clear()}>
+                      None
+                    </Anchor>
+                  </Group>
+                </Group>
 
-          <ShiftTypeFilter
-            color="blue"
-            values={[
-              { id: 1, name: "Occupied" },
-              { id: 2, name: "Free" },
-            ]}
-            selected={selectedOccupancy}
-            onChange={(id, checked) => {
-              if (checked) {
-                selectedOccupancy.add(id);
-              } else {
-                selectedOccupancy.delete(id);
-              }
-            }}
-          />
-        </Stack>
-      </SimpleGrid>
+                <ShiftTypeFilter
+                  color="blue"
+                  values={[
+                    { id: 1, name: "Occupied" },
+                    { id: 2, name: "Free" },
+                  ]}
+                  selected={selectedOccupancy}
+                  onChange={(id, checked) => {
+                    if (checked) {
+                      selectedOccupancy.add(id);
+                    } else {
+                      selectedOccupancy.delete(id);
+                    }
+                  }}
+                />
+              </Stack>
+            </SimpleGrid>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
 
       {Object.entries(shiftsByDate).map(([d, shifts]) => (
         <div key={d}>

@@ -10,6 +10,7 @@ import {
 } from "@remix-run/react";
 import {
   ActionIcon,
+  Text,
   AppShell,
   Burger,
   ColorSchemeScript,
@@ -87,8 +88,14 @@ export default function App() {
       <AppShell.Header>
         <Group h="100%" px="md" align="center">
           <Burger opened={opened} onClick={toggle} />
-          <Title order={1} size="sm" visibleFrom="xs">
+          <Title order={1} size="sm" visibleFrom="sm" fw={800}>
             25. Freiburger Jonglierfestival
+          </Title>
+
+          <Text visibleFrom="sm">/</Text>
+
+          <Title order={2} size="sm" fw={400} visibleFrom="xs">
+            Shifts
           </Title>
           <Switch
             checked={autoRefresh}
