@@ -119,8 +119,8 @@ export default function Index() {
 
   return (
     <>
-      <Accordion defaultValue="foo" mb={30}>
-        <Accordion.Item value="foo">
+      <Accordion defaultValue="bar" mb={30}>
+        <Accordion.Item value="filter">
           <Accordion.Control>
             <Title order={3}>Filter</Title>
           </Accordion.Control>
