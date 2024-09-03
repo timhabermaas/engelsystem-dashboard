@@ -140,3 +140,18 @@ export async function allShiftTypes(): Promise<ShiftType[]> {
     .orderBy("name")
     .execute();
 }
+
+export async function newestLogSequenceNumber(): Promise<number | null> {
+  const logs = await db
+    .selectFrom("log_entries")
+    .select(["id"])
+    .orderBy("id desc")
+    .limit(1)
+    .execute();
+
+  if (logs.length === 0) {
+    return null;
+  } else {
+    return logs[0].id;
+  }
+}

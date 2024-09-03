@@ -29,6 +29,7 @@ import {
 import { useEffect, useState } from "react";
 import { DarkModeToggle } from "./components/dark-mode-toggle";
 import { useFullscreen } from "@mantine/hooks";
+import { useEventSource } from "remix-utils/sse/react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,22 +51,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const { toggle: toggleFullscreen, fullscreen } = useFullscreen();
+
+  const sequenceNumber: string | null = useEventSource("/sse/update", {
+    event: "update",
+  });
 
   const revalidator = useRevalidator();
 
   useEffect(() => {
-    if (autoRefresh) {
-      const interval = setInterval(() => {
-        revalidator.revalidate();
-      }, 30000);
-
-      return () => {
-        clearInterval(interval);
-      };
+    // sequenceNumber === null indicates the first render before we got any
+    // event from the backend. We don't need to refresh in this case.
+    if (sequenceNumber !== null) {
+      revalidator.revalidate();
     }
-  }, [autoRefresh]);
+  }, [sequenceNumber]);
 
   const [opened, setOpened] = useState<boolean>(false);
   const toggle = () => {
