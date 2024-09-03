@@ -30,6 +30,7 @@ import { useEffect, useState } from "react";
 import { DarkModeToggle } from "./components/dark-mode-toggle";
 import { useFullscreen } from "@mantine/hooks";
 import { useEventSource } from "remix-utils/sse/react";
+import { LiveUpdate } from "./components/live-update";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -54,20 +55,6 @@ export default function App() {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const { toggle: toggleFullscreen, fullscreen } = useFullscreen();
 
-  const sequenceNumber: string | null = useEventSource("/sse/update", {
-    event: "update",
-  });
-
-  const revalidator = useRevalidator();
-
-  useEffect(() => {
-    // sequenceNumber === null indicates the first render before we got any
-    // event from the backend. We don't need to refresh in this case.
-    if (sequenceNumber !== null) {
-      revalidator.revalidate();
-    }
-  }, [sequenceNumber]);
-
   const [opened, setOpened] = useState<boolean>(false);
   const toggle = () => {
     setOpened((o) => !o);
@@ -86,6 +73,7 @@ export default function App() {
       }}
       padding="md"
     >
+      {autoRefresh && <LiveUpdate />}
       <AppShell.Header>
         <Group h="100%" px="md" align="center">
           <Burger opened={opened} onClick={toggle} />
